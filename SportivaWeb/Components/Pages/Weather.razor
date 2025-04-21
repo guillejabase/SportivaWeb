@@ -1,22 +1,20 @@
 ﻿@page "/weather"
 @attribute [StreamRendering]
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Sportiva - Clima</PageTitle>
 
-<h1>Weather</h1>
-
-<p>This component demonstrates showing data.</p>
+<h1>Clima</h1>
 
 <!-- This page is rendered in SSR mode, so the FluentDataGrid component does not offer any interactivity (like sorting). -->
-<FluentDataGrid Id="weathergrid" Items="@forecasts" GridTemplateColumns="1fr 1fr 1fr 2fr" Loading="@(forecasts == null)" Style="height:204px;" TGridItem="WeatherForecast">
-    <PropertyColumn Title="Date" Property="@(c => c!.Date)" Align="Align.Start"/>
-    <PropertyColumn Title="Temp. (C)" Property="@(c => c!.TemperatureC)" Align="Align.Center"/>
-    <PropertyColumn Title="Temp. (F)" Property="@(c => c!.TemperatureF)" Align="Align.Center"/>
-    <PropertyColumn Title="Summary" Property="@(c => c!.Summary)" Align="Align.End"/>
+<FluentDataGrid Id="weathergrid" Items="@Forecasts" GridTemplateColumns="1fr 1fr 1fr 2fr" Loading="@(Forecasts == null)" Style="height: 204px;" TGridItem="WeatherForecast">
+    <PropertyColumn Title="Fecha" Property="@(c => c!.Date)" Align="Align.Start"/>
+    <PropertyColumn Title="Temp. en Celsius" Property="@(c => c!.TempInC)" Align="Align.Center"/>
+    <PropertyColumn Title="Temp. en Fahrenheit" Property="@(c => c!.TempInF)" Align="Align.Center"/>
+    <PropertyColumn Title="Resumen" Property="@(c => c!.Summary)" Align="Align.End"/>
 </FluentDataGrid>
 
 @code {
-    private IQueryable<WeatherForecast>? forecasts;
+    private IQueryable<WeatherForecast>? Forecasts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -24,11 +22,12 @@
         await Task.Delay(500);
 
         var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        var summaries = new[] { "Abrasador", "Sofocante", "Caluroso", "Agradable", "Cálido", "Templado", "Fresco", "Frío", "Vigorizante", "Helado" };
+
+        Forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast()
         {
             Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
+            TempInC = Random.Shared.Next(-20, 55),
             Summary = summaries[Random.Shared.Next(summaries.Length)]
         }).AsQueryable();
     }
@@ -36,8 +35,8 @@
     private class WeatherForecast
     {
         public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
+        public int TempInC { get; set; }
         public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public int TempInF => 32 + (int)(TempInC / 0.5556);
     }
 }

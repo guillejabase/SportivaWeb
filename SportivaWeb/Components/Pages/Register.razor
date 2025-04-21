@@ -1,0 +1,49 @@
+﻿@page "/register"
+@using SportivaWeb.Data
+@using SportivaWeb.DTOs
+@using SportivaWeb.Models
+@using SportivaWeb.Services
+@using System.ComponentModel.DataAnnotations
+@inject UsersService UsersService
+@rendermode InteractiveServer
+
+<PageTitle>Sportiva - Registrar cuenta</PageTitle>
+
+<h1>Registrar cuenta</h1>
+
+<FluentStack Orientation="Orientation.Vertical">
+	<FluentTextField Label="Email" @bind-Value="UserData.Email" />
+	<FluentSpacer />
+	<FluentTextField Label="Contraseña" @bind-Value="UserData.Password" />
+	<FluentSpacer />
+	<FluentButton Appearance="Appearance.Accent" @onclick="RegisterData">Registrar</FluentButton>
+	<FluentSpacer />
+
+	@if (!string.IsNullOrEmpty(Message))
+	{
+		<p>@Message</p>
+	}
+</FluentStack>
+
+@code {
+	private UserDTO UserData = new();
+	private string? Message = string.Empty;
+
+	private async Task RegisterData()
+	{
+		var context = new ValidationContext(UserData);
+		var results = new List<ValidationResult>();
+
+		if (!Validator.TryValidateObject(UserData, context, results, true))
+		{
+			Message = string.Join("\n", results.Select(result => result.ErrorMessage));
+			return;
+		}
+		else
+		{
+			var result = await UsersService.AddAsync(UserData);
+
+			Message = result.Success ? "Cuenta registrada." : result.Error;
+		}
+	}
+}
