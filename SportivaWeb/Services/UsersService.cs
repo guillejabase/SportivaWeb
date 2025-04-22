@@ -6,9 +6,16 @@ namespace SportivaWeb.Services
 {
     public class UsersService(AppDbContext context)
     {
+        public AppDbContext Context = context;
+
         public async Task<bool> EmailExistsAsync(string email)
         {
             return await context.Users.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> PasswordCoincidesAsync(string password)
+        {
+            return await context.Users.AnyAsync(u => u.Password == password);
         }
 
         public async Task<(bool Success, string? Error)> AddAsync(UserDTO userData)

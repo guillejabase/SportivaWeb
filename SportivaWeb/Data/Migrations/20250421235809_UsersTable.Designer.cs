@@ -11,7 +11,7 @@ using SportivaWeb.Data;
 namespace SportivaWeb.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250421040032_UsersTable")]
+    [Migration("20250421235809_UsersTable")]
     partial class UsersTable
     {
         /// <inheritdoc />
@@ -34,11 +34,13 @@ namespace SportivaWeb.Data.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.HasKey("Id");
 
