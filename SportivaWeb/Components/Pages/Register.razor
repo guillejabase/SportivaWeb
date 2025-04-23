@@ -16,7 +16,10 @@
 	<FluentSpacer />
 	<FluentTextField Label="Contraseña" @bind-Value="UserData.Password" />
 	<FluentSpacer />
-	<FluentButton Appearance="Appearance.Accent" @onclick="RegisterData">Registrar</FluentButton>
+	<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+		<FluentButton Appearance="Appearance.Accent" @onclick="RegisterData">Registrar</FluentButton>
+		<p style="font-size: 12px; margin: 0;">Ya tienes cuenta? <a href="/login">Iniciá sesión</a></p>
+	</FluentStack>
 	<FluentSpacer />
 
 	@if (!string.IsNullOrEmpty(Message))
