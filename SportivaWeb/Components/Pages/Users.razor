@@ -8,7 +8,7 @@
 
 <h1>Usuarios</h1>
 
-<FluentDataGrid Items="@UsersData">
+<FluentDataGrid Items="@UserList">
     <PropertyColumn Title="ID"
                     Property="@(u => u.Id)"
                     Sortable="true"
@@ -22,7 +22,7 @@
 </FluentDataGrid>
 
 @code {
-    private IQueryable<User> UsersData = Enumerable.Empty<User>().AsQueryable();
+    private IQueryable<User> UserList = Enumerable.Empty<User>().AsQueryable();
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,6 +45,6 @@
             }
         }
 
-        UsersData = userList.AsQueryable();
+        UserList = userList.AsQueryable();
     }
 }

@@ -1,6 +1,5 @@
 ﻿@page "/login"
 @using Microsoft.Data.SqlClient
-@using SportivaWeb.DTOs
 @using SportivaWeb.Models
 @using System.ComponentModel.DataAnnotations
 @inject IConfiguration Configuration
@@ -12,72 +11,78 @@
 <h1>Iniciar sesión</h1>
 
 <FluentStack Orientation="Orientation.Vertical">
-    <FluentTextField Label="Email" @bind-Value="UserData.Email" />
-    <FluentSpacer />
-    <FluentTextField Label="Contraseña" TextFieldType="TextFieldType.Password" @bind-Value="UserData.Password" />
-    <FluentSpacer />
-    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-        <FluentButton Appearance="Appearance.Accent" @onclick="LoginData">Iniciar sesion</FluentButton>
-        <p style="font-size: 12px; margin: 0;">No tienes cuenta? <a href="/register">Regístrate</a></p>
-    </FluentStack>
-    <FluentSpacer />
+	<FluentTextField Label="Email" @bind-Value="User.Email" />
+	<FluentSpacer />
 
-    @if (!string.IsNullOrEmpty(Message))
-    {
-        <p>@Message</p>
-    }
+	<FluentTextField Label="Contraseña" TextFieldType="TextFieldType.Password" @bind-Value="User.Password" />
+	<FluentSpacer />
+
+	<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+		<FluentButton Appearance="Appearance.Accent" @onclick="LoginUser">
+			Iniciar sesión
+		</FluentButton>
+
+		<p style="font-size: 12px; margin: 0;">No tenés cuenta? <a href="/register">Regístrate</a></p>
+	</FluentStack>
+
+	<FluentSpacer />
+
+	@if (!string.IsNullOrEmpty(Message))
+	{
+		<p>@Message</p>
+	}
 </FluentStack>
 
 @code {
-    private UserDTO UserData = new();
-    private string? Message = string.Empty;
+	private User User = new();
+	private string Message = string.Empty;
 
-    private async Task LoginData()
-    {
-        Message = string.Empty;
+	private async Task LoginUser()
+	{
+		Message = string.Empty;
 
-        var context = new ValidationContext(UserData);
-        var results = new List<ValidationResult>();
+		var context = new ValidationContext(User);
+		var results = new List<ValidationResult>();
 
-        if (!Validator.TryValidateObject(UserData, context, results, true))
-        {
-            Message = string.Join("\n", results.Select(result => result.ErrorMessage));
-            return;
-        }
-        else
-        {
-            using (var connection = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-            {
-                await connection.OpenAsync();
+		if (!Validator.TryValidateObject(User, context, results, true))
+		{
+			Message = string.Join("\n", results.Select(r => r.ErrorMessage));
+			return;
+		}
+		else
+		{
+			using (var connection = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+			{
+				await connection.OpenAsync();
 
-                using (var checkEmailCommand = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email", connection))
-                {
-                    checkEmailCommand.Parameters.AddWithValue("@Email", UserData.Email);
+				using (var checkEmailCommand = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email", connection))
+				{
+					checkEmailCommand.Parameters.AddWithValue("@Email", User.Email);
 
-                    if (Convert.ToInt32(await checkEmailCommand.ExecuteScalarAsync()) == 0)
-                    {
-                        Message = "El correo no está registrado.";
-                        return;
-                    }
-                }
-                using (var checkPasswordCommand = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email AND Password = @Password", connection))
-                {
-                    checkPasswordCommand.Parameters.AddWithValue("@Email", UserData.Email);
-                    checkPasswordCommand.Parameters.AddWithValue("@Password", UserData.Password);
+					if (Convert.ToInt32(await checkEmailCommand.ExecuteScalarAsync()) == 0)
+					{
+						Message = "El correo no está registrado.";
+						return;
+					}
+				}
+				using (var checkPasswordCommand = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email AND Password = @Password", connection))
+				{
+					checkPasswordCommand.Parameters.AddWithValue("@Email", User.Email);
+					checkPasswordCommand.Parameters.AddWithValue("@Password", User.Password);
 
-                    if (Convert.ToInt32(await checkPasswordCommand.ExecuteScalarAsync()) == 0)
-                    {
-                        Message = "La contraseña es incorrecta.";
-                        return;
-                    }
-                }
-            }
-        }
+					if (Convert.ToInt32(await checkPasswordCommand.ExecuteScalarAsync()) == 0)
+					{
+						Message = "La contraseña es incorrecta.";
+						return;
+					}
+				}
+			}
+		}
 
-        Message = "Sesión iniciada. Redirigiendo al inicio...";
-        StateHasChanged();
+		Message = "Sesión iniciada. Redirigiendo al inicio...";
+		StateHasChanged();
 
-        await Task.Delay(2000);
-        NavigationManager.NavigateTo("/");
-    }
+		await Task.Delay(2000);
+		NavigationManager.NavigateTo("/");
+	}
 }
