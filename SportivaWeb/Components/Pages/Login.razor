@@ -34,6 +34,8 @@
 
     private async Task LoginData()
     {
+        Message = string.Empty;
+
         var context = new ValidationContext(UserData);
         var results = new List<ValidationResult>();
 
@@ -48,23 +50,34 @@
             {
                 await connection.OpenAsync();
 
-                using (var command = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email AND Password = @Password", connection))
+                using (var checkEmailCommand = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email", connection))
                 {
-                    command.Parameters.AddWithValue("@Email", UserData.Email);
-                    command.Parameters.AddWithValue("@Password", UserData.Password);
+                    checkEmailCommand.Parameters.AddWithValue("@Email", UserData.Email);
 
-                    var result = (int)await command.ExecuteScalarAsync();
-
-                    if (result > 0)
+                    if (Convert.ToInt32(await checkEmailCommand.ExecuteScalarAsync()) == 0)
                     {
-                        NavigationManager.NavigateTo("/");
+                        Message = "El correo no está registrado.";
+                        return;
                     }
-                    else
+                }
+                using (var checkPasswordCommand = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email AND Password = @Password", connection))
+                {
+                    checkPasswordCommand.Parameters.AddWithValue("@Email", UserData.Email);
+                    checkPasswordCommand.Parameters.AddWithValue("@Password", UserData.Password);
+
+                    if (Convert.ToInt32(await checkPasswordCommand.ExecuteScalarAsync()) == 0)
                     {
-                        Message = "Credenciales incorrectas.";
+                        Message = "La contraseña es incorrecta.";
+                        return;
                     }
                 }
             }
         }
+
+        Message = "Sesión iniciada. Redirigiendo al inicio...";
+        StateHasChanged();
+
+        await Task.Delay(2000);
+        NavigationManager.NavigateTo("/");
     }
 }
