@@ -1,10 +1,10 @@
 ﻿@page "/login"
-@using SportivaWeb.Data
+@using Microsoft.Data.SqlClient
 @using SportivaWeb.DTOs
 @using SportivaWeb.Models
-@using SportivaWeb.Services
 @using System.ComponentModel.DataAnnotations
-@inject UsersService UsersService
+@inject IConfiguration Configuration
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
@@ -14,7 +14,7 @@
 <FluentStack Orientation="Orientation.Vertical">
     <FluentTextField Label="Email" @bind-Value="UserData.Email" />
     <FluentSpacer />
-    <FluentTextField Label="Contraseña" @bind-Value="UserData.Password" />
+    <FluentTextField Label="Contraseña" TextFieldType="TextFieldType.Password" @bind-Value="UserData.Password" />
     <FluentSpacer />
     <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
         <FluentButton Appearance="Appearance.Accent" @onclick="LoginData">Iniciar sesion</FluentButton>
@@ -44,24 +44,26 @@
         }
         else
         {
-            var result = await UsersService.EmailExistsAsync(UserData.Email!);
-
-            if (result)
+            using (var connection = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
             {
-                var result2 = await UsersService.PasswordCoincidesAsync(UserData.Password!);
+                await connection.OpenAsync();
 
-                if (result2)
+                using (var command = new SqlCommand("SELECT COUNT(1) FROM Users WHERE Email = @Email AND Password = @Password", connection))
                 {
-                    Message = "Sesión iniciada.";
+                    command.Parameters.AddWithValue("@Email", UserData.Email);
+                    command.Parameters.AddWithValue("@Password", UserData.Password);
+
+                    var result = (int)await command.ExecuteScalarAsync();
+
+                    if (result > 0)
+                    {
+                        NavigationManager.NavigateTo("/");
+                    }
+                    else
+                    {
+                        Message = "Credenciales incorrectas.";
+                    }
                 }
-                else
-                {
-                    Message = "Contraseña incorrecta.";
-                }
-            }
-            else
-            {
-                Message = "Email inexistente.";
             }
         }
     }
