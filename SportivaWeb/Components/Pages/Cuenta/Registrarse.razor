@@ -1,0 +1,103 @@
+﻿@layout CuentaLayout
+@page "/cuenta/registrarse"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.Data.SqlClient
+@using SportivaWeb.Components.Layout
+@using SportivaWeb.Models.DB
+@inject IConfiguration Configuration
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Sportiva - Registrarse</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center">
+	<h3>Registrarse</h3>
+
+	<FluentSpacer />
+
+	<FluentStack Orientation="Orientation.Horizontal" Width="fit-content">
+		<FluentStack Orientation="Orientation.Vertical" Width="fit-content" Style="align-items: end;">
+			<FluentLabel Style="font-weight: bold; margin: 6px 0;">
+				Email:
+			</FluentLabel>
+			<FluentLabel Style="font-weight: bold; margin: 6px 0;">
+				Contraseña:
+			</FluentLabel>
+		</FluentStack>
+
+		<FluentStack Orientation="Orientation.Vertical">
+			<FluentTextField @bind-Value="Usuario.Email" />
+			<FluentTextField TextFieldType="TextFieldType.Password"
+							 @bind-Value="Usuario.Contra" />
+		</FluentStack>
+	</FluentStack>
+
+	<FluentSpacer />
+
+	<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Right" Width="fit-content">
+		<FluentButton Appearance="Appearance.Accent" @onclick="RegistrarUsuario">
+			Registrarse
+		</FluentButton>
+
+		<span style="font-size: 12px;">Ya tenés cuenta? <a href="/cuenta/iniciar-sesion">Iniciá sesión</a></span>
+	</FluentStack>
+
+	<FluentSpacer />
+
+	@if (!string.IsNullOrEmpty(Mensaje))
+	{
+		<span>@Mensaje</span>
+	}
+</FluentStack>
+
+@code {
+	private Usuario Usuario = new();
+	private string? Mensaje = string.Empty;
+
+	private async Task RegistrarUsuario()
+	{
+		Mensaje = string.Empty;
+
+		var contexto = new ValidationContext(Usuario);
+		var resultados = new List<ValidationResult>();
+
+		if (!Validator.TryValidateObject(Usuario, contexto, resultados, true))
+		{
+			Mensaje = string.Join("\n", resultados.Select(r => r.ErrorMessage));
+			return;
+		}
+		using (var conexion = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+		{
+			await conexion.OpenAsync();
+
+			bool usuarioExiste = false;
+
+			using (var emailComando = new SqlCommand("SELECT COUNT(*) FROM Usuarios WHERE Email = @Email", conexion))
+			{
+				emailComando.Parameters.AddWithValue("@Email", Usuario.Email);
+
+				usuarioExiste = Convert.ToInt32(await emailComando.ExecuteScalarAsync()) > 0;
+			}
+
+			if (usuarioExiste)
+			{
+				Mensaje = "El correo ya está registrado.";
+				return;
+			}
+
+			using (var usuarioComando = new SqlCommand("INSERT INTO Usuarios (Email, Contra) VALUES (@Email, @Contra)", conexion))
+			{
+				usuarioComando.Parameters.AddWithValue("@Email", Usuario.Email);
+				usuarioComando.Parameters.AddWithValue("@Contra", Usuario.Contra);
+
+				await usuarioComando.ExecuteNonQueryAsync();
+			}
+		}
+
+		Mensaje = "Usuario registrado correctamente. Redirigiendo al inicio de sesión...";
+		StateHasChanged();
+
+		await Task.Delay(2000);
+		NavigationManager.NavigateTo("/cuenta/iniciar-sesion");
+	}
+}
