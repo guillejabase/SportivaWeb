@@ -4,102 +4,127 @@
 @using Microsoft.Data.SqlClient
 @using SportivaWeb.Components.Layout
 @using SportivaWeb.Models.DB
-@inject IConfiguration Configuration
-@inject NavigationManager NavigationManager
+@inject IConfiguration configuration
+@inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
 
-<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center">
-	<h3>Iniciar sesión</h3>
+<!-- #region Contenedor --> 
+<FluentStack Orientation="Orientation.Vertical"
+			 HorizontalAlignment="HorizontalAlignment.Center">
+	<h1>Iniciar sesión</h1>
 
 	<FluentSpacer />
 
-	<FluentStack Orientation="Orientation.Horizontal" Width="fit-content">
-		<FluentStack Orientation="Orientation.Vertical" Width="fit-content" Style="align-items: end;">
-			<FluentLabel Style="font-weight: bold; margin: 6px 0;">
+	<!-- #region Etiquetas y campos --> 
+	<FluentStack Width="fit-content">
+		<!-- Etiquetas -->
+		<FluentStack Orientation="Orientation.Vertical"
+					 Width="fit-content"
+					 Style="align-items: end;">
+			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px"  Style="font-size: 20px;">
 				Email:
 			</FluentLabel>
-			<FluentLabel Style="font-weight: bold; margin: 6px 0;">
+			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Style="font-size: 20px;">
 				Contraseña:
 			</FluentLabel>
 		</FluentStack>
 
+		<!-- Campos -->
 		<FluentStack Orientation="Orientation.Vertical">
-			<FluentTextField @bind-Value="Usuario.Email" />
+			<FluentTextField Style="font-size: 20px;"
+							 @bind-Value="usuario.Email" />
 			<FluentTextField TextFieldType="TextFieldType.Password"
-							 @bind-Value="Usuario.Contra" />
+							 Style="font-size: 20px;"
+							 @bind-Value="usuario.Contra" />
 		</FluentStack>
 	</FluentStack>
+	<!-- #endregion -->
 
 	<FluentSpacer />
 
-	<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Right" Width="fit-content">
-		<FluentButton Appearance="Appearance.Accent" @onclick="IniciarSesionUsuario">
+	<!-- #region Botón y guía --> 
+	<FluentStack VerticalAlignment="VerticalAlignment.Center"
+				 HorizontalAlignment="HorizontalAlignment.Right"
+				 Width="fit-content">
+		<FluentButton Appearance="Appearance.Accent"
+					  Style="font-size: 20px;"
+					  @onclick="IniciarSesionUsuario">
 			Iniciar sesión
 		</FluentButton>
 
-		<span style="font-size: 12px;">No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
+		<span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
 	</FluentStack>
+	<!-- #endregion -->
 
 	<FluentSpacer />
 
-	@if (!string.IsNullOrEmpty(Mensaje))
+	<!-- #region Mensaje --> 
+	@if (!string.IsNullOrEmpty(mensaje))
 	{
-		<span>@Mensaje</span>
+		<span>@mensaje</span>
 	}
+	<!-- #endregion -->
 </FluentStack>
+<!-- #endregion -->
 
 @code {
-	private Usuario Usuario = new();
-	private string? Mensaje = string.Empty;
+	private Usuario usuario = new();
+	private string? mensaje;
 
 	private async Task IniciarSesionUsuario()
 	{
-		Mensaje = string.Empty;
+		// Limpiar el mensaje por cada acción del botón
+		mensaje = string.Empty;
 
-		var contexto = new ValidationContext(Usuario);
-		var resultados = new List<ValidationResult>();
-
-		if (!Validator.TryValidateObject(Usuario, contexto, resultados, true))
+		#region Validación en el modelo 
+		if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Contra))
 		{
-			Mensaje = string.Join("\n", resultados.Select(r => r.ErrorMessage));
+			mensaje = string.IsNullOrEmpty(usuario.Email) ? "Ingrese email." : string.;
 			return;
 		}
-		else
+		#endregion
+
+		#region Validación en la base de datos 
+		using (var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
 		{
-			using (var conexion = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+			await conexion.OpenAsync();
+
+			var select = "SELECT COUNT(1) FROM Usuarios";
+
+			// Existencia del email
+			using (var emailComando = new SqlCommand($"{select} WHERE Email = @Email", conexion))
 			{
-				await conexion.OpenAsync();
+				emailComando.Parameters.AddWithValue("@Email", usuario.Email);
 
-				using (var emailComando = new SqlCommand("SELECT COUNT(1) FROM Usuarios WHERE Email = @Email", conexion))
+				if (Convert.ToInt32(await emailComando.ExecuteScalarAsync()) == 0)
 				{
-					emailComando.Parameters.AddWithValue("@Email", Usuario.Email);
-
-					if (Convert.ToInt32(await emailComando.ExecuteScalarAsync()) == 0)
-					{
-						Mensaje = "Este email no está registrado.";
-						return;
-					}
+					mensaje = "Este email no está registrado.";
+					return;
 				}
-				using (var contraComando = new SqlCommand("SELECT COUNT(1) FROM Usuarios WHERE Email = @Email AND Contra = @Contra", conexion))
-				{
-					contraComando.Parameters.AddWithValue("@Email", Usuario.Email);
-					contraComando.Parameters.AddWithValue("@Contra", Usuario.Contra);
+			}
 
-					if (Convert.ToInt32(await contraComando.ExecuteScalarAsync()) == 0)
-					{
-						Mensaje = "La contraseña es incorrecta.";
-						return;
-					}
+			// Concidencia con la contraseña del email ingresado
+			using (var contraComando = new SqlCommand($"{select} WHERE Email = @Email AND Contra = @Contra", conexion))
+			{
+				contraComando.Parameters.AddWithValue("@Email", usuario.Email);
+				contraComando.Parameters.AddWithValue("@Contra", usuario.Contra);
+
+				if (Convert.ToInt32(await contraComando.ExecuteScalarAsync()) == 0)
+				{
+					mensaje = "La contraseña es incorrecta.";
+					return;
 				}
 			}
 		}
+		#endregion
 
-		Mensaje = "Sesión iniciada. Redirigiendo al inicio...";
+		// Ir a la página de inicio al iniciar sesión 
+		mensaje = "Sesión iniciada. Dirigiendo al inicio...";
 		StateHasChanged();
 
 		await Task.Delay(2000);
-		NavigationManager.NavigateTo("/");
+		navigationManager.NavigateTo("/");
 	}
 }

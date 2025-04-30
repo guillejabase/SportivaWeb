@@ -8,7 +8,7 @@
 		<a href="/" style="text-decoration: none; color: var(--neutral-layer-1);">Sportiva</a>
 		<FluentSpacer />
 
-		<FluentIcon Value="@(new Icons.Regular.Size20.Person())"
+		<FluentIcon Value="@(new Icons.Regular.Size20.ArrowExit())"
 					Color="Color.Lightweight"
 					@onclick="@(() => NavigationManager.NavigateTo("/cuenta/iniciar-sesion"))" />
 		<FluentIcon Value="@(ThemeMode == DesignThemeModes.Dark ? (Icon)new Icons.Regular.Size20.WeatherSunny() : (Icon)new Icons.Regular.Size20.WeatherMoon())"
