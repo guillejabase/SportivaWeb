@@ -10,64 +10,56 @@
 
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
 
-<!-- #region Contenedor --> 
+<!-- Contenedor -->
 <FluentStack Orientation="Orientation.Vertical"
 			 HorizontalAlignment="HorizontalAlignment.Center">
 	<h1>Iniciar sesión</h1>
 
-	<FluentSpacer />
-
-	<!-- #region Etiquetas y campos --> 
-	<FluentStack Width="fit-content">
+	<!-- Predeterminadamente es horizontal -->
+	<FluentStack Width="auto">
 		<!-- Etiquetas -->
 		<FluentStack Orientation="Orientation.Vertical"
-					 Width="fit-content"
 					 Style="align-items: end;">
-			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px"  Style="font-size: 20px;">
+			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
 				Email:
 			</FluentLabel>
-			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Style="font-size: 20px;">
+			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
 				Contraseña:
 			</FluentLabel>
 		</FluentStack>
 
-		<!-- Campos -->
+		<!-- Campos y botón -->
 		<FluentStack Orientation="Orientation.Vertical">
-			<FluentTextField Style="font-size: 20px;"
+			<FluentTextField Style="width: inherit;"
 							 @bind-Value="usuario.Email" />
 			<FluentTextField TextFieldType="TextFieldType.Password"
-							 Style="font-size: 20px;"
+							 Style="width: inherit;"
 							 @bind-Value="usuario.Contra" />
+
+			<FluentSpacer />
+
+			<FluentStack VerticalAlignment="VerticalAlignment.Center"
+						 Width="max-content">
+				<!-- Botón con acción -->
+				<FluentButton Appearance="Appearance.Accent"
+							  @onclick="IniciarSesionUsuario">
+					Iniciar sesión
+				</FluentButton>
+
+				<!-- Redirección a la página de registrarse en caso de no tener cuenta -->
+				<span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
+			</FluentStack>
 		</FluentStack>
 	</FluentStack>
-	<!-- #endregion -->
 
 	<FluentSpacer />
 
-	<!-- #region Botón y guía --> 
-	<FluentStack VerticalAlignment="VerticalAlignment.Center"
-				 HorizontalAlignment="HorizontalAlignment.Right"
-				 Width="fit-content">
-		<FluentButton Appearance="Appearance.Accent"
-					  Style="font-size: 20px;"
-					  @onclick="IniciarSesionUsuario">
-			Iniciar sesión
-		</FluentButton>
-
-		<span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
-	</FluentStack>
-	<!-- #endregion -->
-
-	<FluentSpacer />
-
-	<!-- #region Mensaje --> 
+	<!-- Mensaje -->
 	@if (!string.IsNullOrEmpty(mensaje))
 	{
 		<span>@mensaje</span>
 	}
-	<!-- #endregion -->
 </FluentStack>
-<!-- #endregion -->
 
 @code {
 	private Usuario usuario = new();
@@ -75,25 +67,38 @@
 
 	private async Task IniciarSesionUsuario()
 	{
-		// Limpiar el mensaje por cada acción del botón
+		// Limpiar el mensaje por cada acción
 		mensaje = string.Empty;
 
-		#region Validación en el modelo 
+		#region Validación en el modelo
+		// Chequear que los valores no estén vacíos
 		if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Contra))
 		{
-			mensaje = string.IsNullOrEmpty(usuario.Email) ? "Ingrese email." : string.;
+			List<string> mensajes = [];
+
+			if (string.IsNullOrEmpty(usuario.Email))
+			{
+				mensajes.Add("Ingrese email.");
+			}
+			if (string.IsNullOrEmpty(usuario.Contra))
+			{
+				mensajes.Add("Ingrese contraseña.");
+			}
+
+			mensaje = string.Join(" ", mensajes);
 			return;
 		}
 		#endregion
 
-		#region Validación en la base de datos 
+		#region Validación en la base de datos
+		// Conectarse a la base de datos
 		using (var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
 		{
 			await conexion.OpenAsync();
 
 			var select = "SELECT COUNT(1) FROM Usuarios";
 
-			// Existencia del email
+			// Chequear que exista el email ingresado
 			using (var emailComando = new SqlCommand($"{select} WHERE Email = @Email", conexion))
 			{
 				emailComando.Parameters.AddWithValue("@Email", usuario.Email);
@@ -105,7 +110,7 @@
 				}
 			}
 
-			// Concidencia con la contraseña del email ingresado
+			// Chequear que la contraseña sea la correcta
 			using (var contraComando = new SqlCommand($"{select} WHERE Email = @Email AND Contra = @Contra", conexion))
 			{
 				contraComando.Parameters.AddWithValue("@Email", usuario.Email);
@@ -120,7 +125,7 @@
 		}
 		#endregion
 
-		// Ir a la página de inicio al iniciar sesión 
+		// Redireccionar a la página de inicio
 		mensaje = "Sesión iniciada. Dirigiendo al inicio...";
 		StateHasChanged();
 
