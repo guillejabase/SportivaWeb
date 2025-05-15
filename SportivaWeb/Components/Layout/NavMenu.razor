@@ -2,13 +2,29 @@
 @rendermode InteractiveServer
 
 <div class="navmenu">
-	<input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
-	<label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
-	<nav class="sitenav" aria-labelledby="main-menu">
-		<FluentNavMenu Id="main-menu" Collapsible="true" Width="250" Title="Navigation menu" @bind-Expanded="Expanded" CustomToggle="true">
+	<input type="checkbox"
+		   id="navmenu-toggle"
+		   class="navmenu-icon" />
+	<label for="navmenu-toggle"
+		   class="navmenu-icon">
+		<FluentIcon Value="@(new Icons.Regular.Size20.Navigation())"
+					Color="Color.Fill" />
+	</label>
+	<nav class="sitenav"
+		 aria-labelledby="main-menu">
+		<FluentNavMenu Id="main-menu"
+					   Collapsible="true"
+					   Width="250"
+					   Title="Navigation menu"
+					   CustomToggle="true"
+					   @bind-Expanded="Expanded">
 			@foreach (var item in NavItems)
 			{
-				<FluentNavLink Href="@item.Href" Match="NavLinkMatch.All" Icon="@item.Icon" IconColor="Color.Accent">
+				<FluentNavLink Href="@item.Href"
+							   Match="NavLinkMatch.All"
+							   Icon="@item.Icon"
+							   IconColor="Color.Accent"
+							   Tooltip="@item.Title">
 					@item.Title
 				</FluentNavLink>
 			}

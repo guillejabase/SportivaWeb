@@ -3,24 +3,42 @@
 <PageTitle>Sportiva - Eventos</PageTitle>
 
 <FluentStack HorizontalAlignment="HorizontalAlignment.Center">
-	<h3>Eventos</h3>
+	<h1>Eventos</h1>
 </FluentStack>
 
-<FluentGrid Spacing="2">
-	@for (var index = 0; index < 3; index++)
-	{
-		<FluentGridItem>
-			<FluentCard Width="250px" Height="350px">
-				<FluentStack Orientation="Orientation.Vertical">
-					<img src="images/events/eco_trail_by_dexter.jpg" style="width: 100%; height: 150px; object-fit: cover; object-position: center;" />
+<FluentStack>
+	<FluentGrid Spacing="2">
+		@for (var index = 0; index < 3; index++)
+		{
+			<FluentGridItem>
+				<FluentCard Width="250px">
+					<FluentStack Orientation="Orientation.Vertical">
+						<FluentStack Orientation="Orientation.Vertical">
+							<img src="images/events/eco_trail_by_dexter.jpg" style="width: 100%; height: 150px; object-fit: cover; object-position: center;" />
 
-					<h3>EcoTrail</h3>
-
-					<FluentStack Orientation="Orientation.Vertical" Style="background-color: var();">
-						<span>a</span>
+							<FluentStack Orientation="Orientation.Vertical"
+										 VerticalGap="0">
+								<h4 style="margin-bottom: 6px;">EcoTrail</h4>
+								<span><strong>Ubicación:</strong> CABA</span>
+							</FluentStack>
+						</FluentStack>
+						<FluentSpacer />
+						<FluentStack Orientation="Orientation.Horizontal"
+									 HorizontalAlignment="HorizontalAlignment.Center">
+							<FluentButton Appearance="Appearance.Accent">
+								Modificar
+							</FluentButton>
+							<FluentButton Appearance="Appearance.Accent">
+								Eliminar
+							</FluentButton>
+						</FluentStack>
 					</FluentStack>
-				</FluentStack>
-			</FluentCard>
-		</FluentGridItem>
-	}
-</FluentGrid>
+				</FluentCard>
+			</FluentGridItem>
+		}
+	</FluentGrid>
+</FluentStack>
+
+@code {
+
+}
