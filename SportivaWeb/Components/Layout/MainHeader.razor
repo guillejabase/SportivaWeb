@@ -1,0 +1,25 @@
+﻿@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<FluentDesignTheme @bind-Mode="ThemeMode" />
+
+<FluentHeader>
+	<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+		<a href="/" style="text-decoration: none; color: var(--neutral-layer-1);">Sportiva</a>
+
+		<FluentSpacer />
+
+		<FluentIcon Value="@(new Icons.Regular.Size20.ArrowExit())"
+					Color="Color.Lightweight"
+					Title="Cerrar sesión"
+					@onclick="@(() => NavigationManager.NavigateTo("/cuenta/iniciar-sesion"))" />
+		<FluentIcon Value="@(ThemeMode == DesignThemeModes.Dark ? (Icon)new Icons.Regular.Size20.WeatherSunny() : (Icon)new Icons.Regular.Size20.WeatherMoon())"
+					Color="Color.Lightweight"
+					Title="@(ThemeMode == DesignThemeModes.Dark ? "Modo claro" : "Modo oscuro")"
+					@onclick="@(() => ThemeMode = ThemeMode == DesignThemeModes.Dark ? DesignThemeModes.Light : DesignThemeModes.Dark)" />
+	</FluentStack>
+</FluentHeader>
+
+@code {
+	private DesignThemeModes ThemeMode = DesignThemeModes.Light;
+}

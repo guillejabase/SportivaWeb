@@ -1,20 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
 <FluentLayout>
-    <MainHeader />
+    <CuentaHeader />
     <FluentStack Class="main" Orientation="Orientation.Horizontal" Style="column-gap: 0;">
-        <NavMenu />
         <FluentBodyContent Class="body-content">
-            <div class="content" style="padding: 0.5rem;">
+            <div class="content" style="padding: 3rem;">
                 @Body
             </div>
         </FluentBodyContent>
     </FluentStack>
-    <FluentFooter>
-        <a href="https://www.fluentui-blazor.net" target="_blank">Documentation and demos</a>
-        <FluentSpacer />
-        <a href="https://learn.microsoft.com/en-us/aspnet/core/blazor" target="_blank">About Blazor</a>
-    </FluentFooter>
 </FluentLayout>
 
 <div id="blazor-error-ui" data-nosnippet>
