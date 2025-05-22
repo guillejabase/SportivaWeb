@@ -2,7 +2,7 @@
 
 namespace SportivaWeb.Models.DB
 {
-    public class Evento
+    public class EventoModel
     {
         public int Id { get; set; }
 
@@ -11,10 +11,10 @@ namespace SportivaWeb.Models.DB
         public string Nombre { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ingrese fecha.")]
-        public DateTime Fecha { get; set; } = DateTime.MaxValue;
+        public DateTime Fecha { get; set; } = DateTime.MinValue;
 
         [Required(ErrorMessage = "Ingrese ubicación.")]
         [MaxLength(32, ErrorMessage = "La descripción de la ubicación debe tener un máximo de 32 carácteres.")]
-        public string Ubicacion { get; set; } = string.Empty;
+        public string Ubi { get; set; } = string.Empty;
     }
 }

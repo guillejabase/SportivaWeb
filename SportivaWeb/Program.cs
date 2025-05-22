@@ -1,11 +1,14 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using SportivaWeb.Components;
+using SportivaWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
+
+builder.Services.AddScoped<IEventosService, EventosService>();
 
 var app = builder.Build();
 

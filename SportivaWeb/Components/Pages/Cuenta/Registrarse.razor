@@ -10,14 +10,11 @@
 
 <PageTitle>Sportiva - Registrarse</PageTitle>
 
-<!-- Contenedor -->
 <FluentStack Orientation="Orientation.Vertical"
 			 HorizontalAlignment="HorizontalAlignment.Center">
 	<h1>Registrarse</h1>
 
-	<!-- Predeterminadamente es horizontal -->
 	<FluentStack Width="auto">
-		<!-- Etiquetas -->
 		<FluentStack Orientation="Orientation.Vertical"
 					 Style="align-items: end;">
 			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
@@ -31,7 +28,6 @@
 			</FluentLabel>
 		</FluentStack>
 
-		<!-- Campos y botón -->
 		<FluentStack Orientation="Orientation.Vertical">
 			<FluentTextField Style="width: inherit;"
 							 @bind-Value="usuario.Email" />
@@ -46,13 +42,11 @@
 
 			<FluentStack VerticalAlignment="VerticalAlignment.Center"
 						 Width="max-content">
-				<!-- Botón con acción -->
 				<FluentButton Appearance="Appearance.Accent"
-							  @onclick="IniciarSesionUsuario">
+							  @onclick="RegistrarUsuarioAsync">
 					Registrarse
 				</FluentButton>
 
-				<!-- Redirección a la página de iniciar sesión en caso de tener cuenta -->
 				<span>Ya tenés cuenta? <a href="@link">Iniciá sesión</a></span>
 			</FluentStack>
 		</FluentStack>
@@ -60,7 +54,6 @@
 
 	<FluentSpacer />
 
-	<!-- Mensaje -->
 	@if (!string.IsNullOrEmpty(mensaje))
 	{
 		<span>@mensaje</span>
@@ -68,24 +61,20 @@
 </FluentStack>
 
 @code {
-	private Usuario usuario = new();
+	private UsuarioModel usuario = new();
 	private string confirmacion = string.Empty;
 	private string link = "/cuenta/iniciar-sesion";
 	private string? mensaje;
 
-	private async Task IniciarSesionUsuario()
+	private async Task RegistrarUsuarioAsync()
 	{
-		// Limpiar el mensaje por cada acción
 		mensaje = string.Empty;
 
-		#region Validación en el modelo
-		// Obtener mensaje en caso de que los valores no sean válidos
 		var context = new ValidationContext(usuario);
 		var results = new List<ValidationResult>();
 
 		if (!Validator.TryValidateObject(usuario, context, results, true))
 		{
-			// Ejemplo: "Ingrese email. Ingrese contraseña."
 			mensaje = string.Join("\n", results.Select(r => r.ErrorMessage));
 			return;
 		}
@@ -99,42 +88,32 @@
 			mensaje = "La confirmación de contraseña no coincide con la misma.";
 			return;
 		}
-		#endregion
 
-		#region Validación en la base de datos
-		// Conectarse a la base de datos
-		using (var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+		using var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
+
+		await conexion.OpenAsync();
+
+		using var emailComando = new SqlCommand($"SELECT COUNT(*) FROM Usuarios WHERE Email = @Email", conexion);
+
+		emailComando.Parameters.AddWithValue("@Email", usuario.Email);
+
+		if (Convert.ToInt32(await emailComando.ExecuteScalarAsync()) > 0)
 		{
-			await conexion.OpenAsync();
-
-			// Chequear que no exista el email ingresado
-			using (var emailComando = new SqlCommand($"SELECT COUNT(*) FROM Usuarios WHERE Email = @Email", conexion))
-			{
-				emailComando.Parameters.AddWithValue("@Email", usuario.Email);
-
-				if (Convert.ToInt32(await emailComando.ExecuteScalarAsync()) > 0)
-				{
-					mensaje = "El correo ya está registrado.";
-					return;
-				}
-			}
-
-			// Insertar los valores
-			using (var usuarioComando = new SqlCommand("INSERT INTO Usuarios (Email, Contra) VALUES (@Email, @Contra)", conexion))
-			{
-				usuarioComando.Parameters.AddWithValue("@Email", usuario.Email);
-				usuarioComando.Parameters.AddWithValue("@Contra", usuario.Contra);
-
-				await usuarioComando.ExecuteNonQueryAsync();
-			}
+			mensaje = "El correo ya está registrado.";
+			return;
 		}
-		#endregion
 
-		// Redireccionar a la página de iniciar sesión
+		using var usuarioComando = new SqlCommand("INSERT INTO Usuarios (Email, Contra) VALUES (@Email, @Contra)", conexion);
+
+		usuarioComando.Parameters.AddWithValue("@Email", usuario.Email);
+		usuarioComando.Parameters.AddWithValue("@Contra", usuario.Contra);
+
+		await usuarioComando.ExecuteNonQueryAsync();
+
 		mensaje = "Usuario registrado correctamente. Redirigiendo al inicio de sesión...";
 		StateHasChanged();
 
-		await Task.Delay(2000);
+		await Task.Delay(1000);
 		navigationManager.NavigateTo(link);
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace SportivaWeb.Models.DB
 {
-    public class Usuario
+    public class UsuarioModel
     {
         public int Id { get; set; }
 

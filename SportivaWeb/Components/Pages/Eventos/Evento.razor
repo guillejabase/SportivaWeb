@@ -1,0 +1,40 @@
+﻿@page "/eventos/{Id:int}"
+@using SportivaWeb.Models.DB;
+@using SportivaWeb.Services;
+@inject IEventosService eventosService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Sportiva - @evento.Nombre</PageTitle>
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center">
+    <h1>Información de evento</h1>
+</FluentStack>
+
+<FluentButton Appearance="Appearance.Accent"
+              @onclick="@(() => navigationManager.NavigateTo($"/eventos"))">
+    Volver
+</FluentButton>
+
+<strong>Nombre:</strong> @evento.Nombre
+<strong>Fecha:</strong> @evento.Fecha
+<strong>Ubicación:</strong> @evento.Ubi
+
+<FluentButton Appearance="Appearance.Accent"
+              @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}/inscripcion"))">
+    Inscribirse
+</FluentButton>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EventoModel evento = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var eventos = await eventosService.ObtenerAsync();
+
+        evento = eventos.First(e => e.Id == Id);
+    }
+}
