@@ -9,6 +9,9 @@ builder.Services.AddRazorComponents()
 builder.Services.AddFluentUIComponents();
 
 builder.Services.AddScoped<IEventosService, EventosService>();
+builder.Services.AddScoped<IUsuariosService, UsuariosService>();
+
+builder.Services.AddSingleton<ICuentaService, CuentaService>();
 
 var app = builder.Build();
 

@@ -8,15 +8,26 @@
 <PageTitle>Sportiva - Inscripción</PageTitle>
 
 <FluentStack HorizontalAlignment="HorizontalAlignment.Center">
-	<h1>Inscripción al evento</h1>
+    <h2>Inscripción a evento:</h2> <h2 style="font-weight: normal">@evento.Nombre</h2>
 </FluentStack>
 
-<FluentButton Appearance="Appearance.Accent"
-              @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}"))">
-    Volver
-</FluentButton>
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentButton Appearance="Appearance.Accent"
+                  @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}"))">
+        Volver
+    </FluentButton>
+</FluentStack>
 
 @code {
     [Parameter]
     public int Id { get; set; }
+
+    private EventoModel evento = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var eventos = await eventosService.ObtenerAsync();
+
+        evento = eventos.FirstOrDefault(e => e.Id == Id)!;
+    }
 }

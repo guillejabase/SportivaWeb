@@ -12,7 +12,7 @@ namespace SportivaWeb.Services
     {
         public async Task<List<EventoModel>> ObtenerAsync()
         {
-            List<EventoModel> eventos = [];
+            List<EventoModel> lista = [];
 
             using var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
 
@@ -23,16 +23,20 @@ namespace SportivaWeb.Services
 
             while (await lector.ReadAsync())
             {
-                eventos.Add(new()
+                lista.Add(new()
                 {
                     Id = lector.GetInt32(lector.GetOrdinal("Id")),
                     Nombre = lector.GetString(lector.GetOrdinal("Nombre")),
-                    Fecha = lector.GetDateTime(lector.GetOrdinal("Fecha")),
-                    Ubi = lector.GetString(lector.GetOrdinal("Ubi"))
+                    Descri = lector.GetString(lector.GetOrdinal("Descri")),
+                    FechaApeIns = lector.GetDateTime(lector.GetOrdinal("FechaApeIns")),
+                    FechaCieIns = lector.GetDateTime(lector.GetOrdinal("FechaCieIns")),
+                    FechaInicio = lector.GetDateTime(lector.GetOrdinal("FechaInicio")),
+                    Provincia = lector.GetInt32(lector.GetOrdinal("Provincia")),
+                    Imagen = lector.GetString(lector.GetOrdinal("Imagen"))
                 });
             }
 
-            return eventos;
+            return lista;
         }
     }
 }

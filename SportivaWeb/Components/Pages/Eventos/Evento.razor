@@ -5,25 +5,23 @@
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-<PageTitle>Sportiva - @evento.Nombre</PageTitle>
+<PageTitle>Sportiva - Evento</PageTitle>
 
 <FluentStack HorizontalAlignment="HorizontalAlignment.Center">
-    <h1>Información de evento</h1>
+    <h2>Información de evento:</h2> <h2 style="font-weight: normal">@evento.Nombre</h2>
 </FluentStack>
 
-<FluentButton Appearance="Appearance.Accent"
-              @onclick="@(() => navigationManager.NavigateTo($"/eventos"))">
-    Volver
-</FluentButton>
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentButton Appearance="Appearance.Accent"
+                  @onclick="@(() => navigationManager.NavigateTo($"/"))">
+        Volver
+    </FluentButton>
 
-<strong>Nombre:</strong> @evento.Nombre
-<strong>Fecha:</strong> @evento.Fecha
-<strong>Ubicación:</strong> @evento.Ubi
-
-<FluentButton Appearance="Appearance.Accent"
-              @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}/inscripcion"))">
-    Inscribirse
-</FluentButton>
+    <FluentButton Appearance="Appearance.Accent"
+                  @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}/inscripcion"))">
+        Inscribirse
+    </FluentButton>
+</FluentStack>
 
 @code {
     [Parameter]

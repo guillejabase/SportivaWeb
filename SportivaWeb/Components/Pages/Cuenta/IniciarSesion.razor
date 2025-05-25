@@ -1,24 +1,24 @@
-﻿@layout CuentaLayout
-@page "/cuenta/iniciar-sesion"
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.Data.SqlClient
-@using SportivaWeb.Components.Layout
-@using SportivaWeb.Models.DB
+﻿@page "/cuenta/iniciar-sesion"
 @inject IConfiguration configuration
+@inject ICuentaService cuentaService
+@inject IUsuariosService usuariosService
 @inject NavigationManager navigationManager
+@using Microsoft.Data.SqlClient
+@using SportivaWeb.Models.DB
+@using SportivaWeb.Services
 @rendermode InteractiveServer
 
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
 
 <FluentStack Orientation="Orientation.Vertical"
 			 HorizontalAlignment="HorizontalAlignment.Center">
-	<h1>Iniciar sesión</h1>
+	<h2>Iniciar sesión</h2>
 
 	<FluentStack Width="auto">
 		<FluentStack Orientation="Orientation.Vertical"
-					 Style="align-items: end;">
+					 Style="align-items: end">
 			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
-				Email:
+				Nombre de usuario:
 			</FluentLabel>
 			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
 				Contraseña:
@@ -26,18 +26,18 @@
 		</FluentStack>
 
 		<FluentStack Orientation="Orientation.Vertical">
-			<FluentTextField Style="width: inherit;"
-							 @bind-Value="usuario.Email" />
+			<FluentTextField Style="width: inherit"
+							 @bind-Value="nombre" />
 			<FluentTextField TextFieldType="TextFieldType.Password"
-							 Style="width: inherit;"
-							 @bind-Value="usuario.Contra" />
+							 Style="width: inherit"
+							 @bind-Value="contra" />
 
 			<FluentSpacer />
 
 			<FluentStack VerticalAlignment="VerticalAlignment.Center"
 						 Width="max-content">
 				<FluentButton Appearance="Appearance.Accent"
-							  @onclick="IniciarSesionUsuarioAsync">
+							  @onclick="AccederAsync">
 					Iniciar sesión
 				</FluentButton>
 
@@ -50,66 +50,49 @@
 
 	@if (!string.IsNullOrEmpty(mensaje))
 	{
-		<span>@mensaje</span>
+		<span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
 	}
 </FluentStack>
 
 @code {
-	private UsuarioModel usuario = new();
+	private string nombre = string.Empty;
+	private string contra = string.Empty;
 	private string? mensaje;
 
-	private async Task IniciarSesionUsuarioAsync()
+	private async Task AccederAsync()
 	{
 		mensaje = string.Empty;
 
-		if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Contra))
+		if (string.IsNullOrEmpty(nombre) && string.IsNullOrEmpty(contra))
 		{
-			List<string> mensajes = [];
-
-			if (string.IsNullOrEmpty(usuario.Email))
-			{
-				mensajes.Add("Ingrese email.");
-			}
-			if (string.IsNullOrEmpty(usuario.Contra))
-			{
-				mensajes.Add("Ingrese contraseña.");
-			}
-
-			mensaje = string.Join(" ", mensajes);
+			mensaje = "Ingrese nombre de usuario.<br />Ingrese contraseña.";
+			return;
+		}
+		if (string.IsNullOrEmpty(nombre))
+		{
+			mensaje = "Ingrese nombre de usuario.";
 			return;
 		}
 
-		using var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
+		var resultado = await usuariosService.ValidarCredencialesAsync(nombre, contra);
 
-		await conexion.OpenAsync();
-
-		var select = "SELECT COUNT(1) FROM Usuarios";
-
-		using var emailComando = new SqlCommand($"{select} WHERE Email = @Email", conexion);
-
-		emailComando.Parameters.AddWithValue("@Email", usuario.Email);
-
-		if (Convert.ToInt32(await emailComando.ExecuteScalarAsync()) == 0)
+		if (!resultado.Existe)
 		{
-			mensaje = "Este email no está registrado.";
+			mensaje = "El nombre de usuario no está registrado.";
 			return;
 		}
-
-		using var contraComando = new SqlCommand($"{select} WHERE Email = @Email AND Contra = @Contra", conexion);
-
-		contraComando.Parameters.AddWithValue("@Email", usuario.Email);
-		contraComando.Parameters.AddWithValue("@Contra", usuario.Contra);
-
-		if (Convert.ToInt32(await contraComando.ExecuteScalarAsync()) == 0)
+		if (string.IsNullOrEmpty(contra))
+		{
+			mensaje = "Ingrese contraseña.";
+			return;
+		}
+		if (resultado.Usuario == null)
 		{
 			mensaje = "La contraseña es incorrecta.";
 			return;
 		}
 
-		mensaje = "Sesión iniciada. Dirigiendo al inicio...";
-		StateHasChanged();
-
-		await Task.Delay(1000);
+		cuentaService.IniciarSesion(resultado.Usuario);
 		navigationManager.NavigateTo("/");
 	}
 }
