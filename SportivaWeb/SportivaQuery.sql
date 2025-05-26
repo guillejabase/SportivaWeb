@@ -14,17 +14,25 @@ VALUES ('admin', 'admin@gmail.com', 'admin123');
 
 CREATE TABLE Provincias (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	Nombre VARCHAR(32) NOT NULL UNIQUE
+	Nombre VARCHAR(19) NOT NULL UNIQUE
 );
 
 INSERT INTO Provincias (Nombre)
-VALUES ('Buenos Aires'), ('CABA'), ('Catamarca'), ('Chaco'),
+VALUES ('Buenos Aires'), ('Capital Federal'), ('Catamarca'), ('Chaco'),
        ('Chubut'), ('Córdoba'), ('Corrientes'), ('Entre Ríos'),
 	   ('Formosa'), ('Jujuy'), ('La Pampa'), ('La Rioja'),
 	   ('Mendoza'), ('Misiones'), ('Neuquén'), ('Río Negro'),
 	   ('Salta'), ('San Juan'), ('San Luis'), ('Santa Cruz'),
 	   ('Santa Fe'), ('Santiago del Estero'), ('Tierra del Fuego'),
 	   ('Tucumán');
+
+CREATE TABLE Sexos (
+	Id INT IDENTITY(1,1) PRIMARY KEY,
+	Nombre VARCHAR(6) NOT NULL UNIQUE
+);
+
+INSERT INTO Sexos (Nombre)
+VALUES ('Hombre'), ('Mujer');
 
 CREATE TABLE Eventos (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
@@ -46,11 +54,18 @@ VALUES ('EcoTrail', '', '2025-08-05', '2025-08-07', '2025-09-07T09:30:00', 1, '1
 CREATE TABLE Inscriptos (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
 	Usuario INT NOT NULL,
+	Nombres VARCHAR(32) NOT NULL,
+	Apellidos VARCHAR(32) NOT NULL,
 	Provincia INT NOT NULL,
+	CodPostal INT NOT NULL,
 	Documento INT NOT NULL,
+	FechaNaci DATETIME2(0) NOT NULL,
+	Sexo INT NOT NULL,
+	Telefono VARCHAR(16) NOT NULL,
 
 	CONSTRAINT FK_Inscriptos_Usuario FOREIGN KEY (Usuario) REFERENCES Usuarios(Id),
-	CONSTRAINT FK_Inscriptos_Provincia FOREIGN KEY (Provincia) REFERENCES Provincias(Id)
+	CONSTRAINT FK_Inscriptos_Provincia FOREIGN KEY (Provincia) REFERENCES Provincias(Id),
+	CONSTRAINT FK_Inscriptos_Sexo FOREIGN KEY (Sexo) REFERENCES Sexos(Id)
 );
 
 CREATE TABLE Inscripciones (
