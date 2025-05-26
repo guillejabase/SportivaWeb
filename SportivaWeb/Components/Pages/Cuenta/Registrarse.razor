@@ -29,6 +29,13 @@
 			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
 				Confirmación de contraseña:
 			</FluentLabel>
+
+			<FluentSpacer />
+
+			<FluentButton Appearance="Appearance.Accent"
+						  @onclick="@(() => navigationManager.NavigateTo("/"))">
+				Cancelar
+			</FluentButton>
 		</FluentStack>
 
 		<FluentStack Orientation="Orientation.Vertical">

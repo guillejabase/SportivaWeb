@@ -17,15 +17,15 @@
 					   Width="250"
 					   Title="Navigation menu"
 					   CustomToggle="true"
-					   @bind-Expanded="Expanded">
-			@foreach (var item in NavItems)
+					   @bind-Expanded="expanded">
+			@foreach (var item in navItems)
 			{
-				<FluentNavLink Href="@item.Href"
+				<FluentNavLink Href="@item.Ruta"
 							   Match="NavLinkMatch.All"
-							   Icon="@item.Icon"
+							   Icon="@item.Icono"
 							   IconColor="Color.Accent"
-							   Tooltip="@item.Title">
-					@item.Title
+							   Tooltip="@item.Titulo">
+					@item.Titulo
 				</FluentNavLink>
 			}
 		</FluentNavMenu>
@@ -33,11 +33,11 @@
 </div>
 
 @code {
-	private bool Expanded = true;
+	private bool expanded = true;
 
-	private List<NavItem> NavItems = new()
+	private List<NavItem> navItems = new()
 	{
-		new() { Href = "/", Icon = new Icons.Regular.Size20.Home(), Title = "Inicio" },
-		new() { Href = "/eventos", Icon = new Icons.Regular.Size20.BoxMultiple(), Title = "Eventos" }
+		new() { Ruta = "/menu/eventos", Icono = new Icons.Regular.Size24.BoxMultiple(), Titulo = "Eventos" },
+		new() { Ruta = "/menu/usuarios", Icono = new Icons.Regular.Size24.People(), Titulo = "Usuarios" }
 	};
 }

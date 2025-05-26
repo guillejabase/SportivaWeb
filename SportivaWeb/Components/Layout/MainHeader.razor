@@ -1,5 +1,5 @@
 ﻿@implements IDisposable
-@inject ICuentaService cuentaService
+@inject ISesionService sesionService
 @inject NavigationManager navigationManager
 @using SportivaWeb.Services
 @rendermode InteractiveServer
@@ -11,11 +11,11 @@
     <FluentStack Orientation="Orientation.Horizontal"
                  VerticalAlignment="VerticalAlignment.Center"
                  Style="font-size: 24px">
-        Sportiva
+        <a href="/" style="text-decoration: none; color: var(--neutral-layer-1);">Sportiva</a>
 
         <FluentSpacer />
 
-        @if (cuentaService.Usuario == null)
+        @if (sesionService.Usuario == null)
         {
             <FluentIcon Value="@(new Icons.Regular.Size24.Person())"
                         Color="Color.Lightweight"
@@ -26,7 +26,7 @@
         {
             <FluentIcon Value="@(new Icons.Regular.Size24.ArrowForwardDownPerson())"
                         Color="Color.Lightweight"
-                        Title="Iniciar sesión"
+                        Title="Cerrar sesión"
                         @onclick="CerrarSesion" />
         }
 
@@ -47,17 +47,17 @@
 
     protected override void OnInitialized()
     {
-        cuentaService.EnSesionCambiada += Invocar;
+        sesionService.EnSesionCambiada += Invocar;
     }
 
     public void Dispose()
     {
-        cuentaService.EnSesionCambiada -= Invocar;
+        sesionService.EnSesionCambiada -= Invocar;
     }
 
     private void CerrarSesion()
     {
-        cuentaService.CerrarSesion();
+        sesionService.CerrarSesion();
         navigationManager.NavigateTo("/cuenta/sesion-cerrada");
     }
 }

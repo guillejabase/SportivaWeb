@@ -1,6 +1,6 @@
 ﻿@page "/cuenta/iniciar-sesion"
 @inject IConfiguration configuration
-@inject ICuentaService cuentaService
+@inject ISesionService sesionService
 @inject IUsuariosService usuariosService
 @inject NavigationManager navigationManager
 @using Microsoft.Data.SqlClient
@@ -11,88 +11,95 @@
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
 
 <FluentStack Orientation="Orientation.Vertical"
-			 HorizontalAlignment="HorizontalAlignment.Center">
-	<h2>Iniciar sesión</h2>
+             HorizontalAlignment="HorizontalAlignment.Center">
+    <h2>Iniciar sesión</h2>
 
-	<FluentStack Width="auto">
-		<FluentStack Orientation="Orientation.Vertical"
-					 Style="align-items: end">
-			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
-				Nombre de usuario:
-			</FluentLabel>
-			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
-				Contraseña:
-			</FluentLabel>
-		</FluentStack>
+    <FluentStack Width="auto">
+        <FluentStack Orientation="Orientation.Vertical"
+                     Style="align-items: end">
+            <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
+                Nombre de usuario:
+            </FluentLabel>
+            <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
+                Contraseña:
+            </FluentLabel>
 
-		<FluentStack Orientation="Orientation.Vertical">
-			<FluentTextField Style="width: inherit"
-							 @bind-Value="nombre" />
-			<FluentTextField TextFieldType="TextFieldType.Password"
-							 Style="width: inherit"
-							 @bind-Value="contra" />
+            <FluentSpacer />
 
-			<FluentSpacer />
+            <FluentButton Appearance="Appearance.Accent"
+                          @onclick="@(() => navigationManager.NavigateTo("/"))">
+                Cancelar
+            </FluentButton>
+        </FluentStack>
 
-			<FluentStack VerticalAlignment="VerticalAlignment.Center"
-						 Width="max-content">
-				<FluentButton Appearance="Appearance.Accent"
-							  @onclick="AccederAsync">
-					Iniciar sesión
-				</FluentButton>
+        <FluentStack Orientation="Orientation.Vertical">
+            <FluentTextField Style="width: inherit"
+                             @bind-Value="nombre" />
+            <FluentTextField TextFieldType="TextFieldType.Password"
+                             Style="width: inherit"
+                             @bind-Value="contra" />
 
-				<span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
-			</FluentStack>
-		</FluentStack>
-	</FluentStack>
+            <FluentSpacer />
 
-	<FluentSpacer />
+            <FluentStack VerticalAlignment="VerticalAlignment.Center"
+                         Width="max-content">
+                <FluentButton Appearance="Appearance.Accent"
+                              @onclick="AccederAsync">
+                    Iniciar sesión
+                </FluentButton>
 
-	@if (!string.IsNullOrEmpty(mensaje))
-	{
-		<span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
-	}
+                <span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
+            </FluentStack>
+        </FluentStack>
+    </FluentStack>
+
+    <FluentSpacer />
+
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
+    }
 </FluentStack>
 
 @code {
-	private string nombre = string.Empty;
-	private string contra = string.Empty;
-	private string? mensaje;
+    private string nombre = string.Empty;
+    private string contra = string.Empty;
+    private string? mensaje;
 
-	private async Task AccederAsync()
-	{
-		mensaje = string.Empty;
+    private async Task AccederAsync()
+    {
+        mensaje = string.Empty;
 
-		if (string.IsNullOrEmpty(nombre) && string.IsNullOrEmpty(contra))
-		{
-			mensaje = "Ingrese nombre de usuario.<br />Ingrese contraseña.";
-			return;
-		}
-		if (string.IsNullOrEmpty(nombre))
-		{
-			mensaje = "Ingrese nombre de usuario.";
-			return;
-		}
+        if (string.IsNullOrEmpty(nombre) && string.IsNullOrEmpty(contra))
+        {
+            mensaje = "Ingrese nombre de usuario.<br />Ingrese contraseña.";
+            return;
+        }
+        if (string.IsNullOrEmpty(nombre))
+        {
+            mensaje = "Ingrese nombre de usuario.";
+            return;
+        }
 
-		var resultado = await usuariosService.ValidarCredencialesAsync(nombre, contra);
+        var resultado = await usuariosService.ValidarCredencialesAsync(nombre, contra);
 
-		if (!resultado.Existe)
-		{
-			mensaje = "El nombre de usuario no está registrado.";
-			return;
-		}
-		if (string.IsNullOrEmpty(contra))
-		{
-			mensaje = "Ingrese contraseña.";
-			return;
-		}
-		if (resultado.Usuario == null)
-		{
-			mensaje = "La contraseña es incorrecta.";
-			return;
-		}
+        if (!resultado.Existe)
+        {
+            mensaje = "El nombre de usuario no está registrado.";
+            return;
+        }
+        if (string.IsNullOrEmpty(contra))
+        {
+            mensaje = "Ingrese contraseña.";
+            return;
+        }
+        if (resultado.Usuario == null)
+        {
+            mensaje = "La contraseña es incorrecta.";
+            return;
+        }
 
-		cuentaService.IniciarSesion(resultado.Usuario);
-		navigationManager.NavigateTo("/");
-	}
+        sesionService.IniciarSesion(resultado.Usuario);
+        navigationManager.NavigateTo("/");
+    }
 }

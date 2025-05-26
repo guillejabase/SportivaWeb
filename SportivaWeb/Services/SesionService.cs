@@ -2,7 +2,7 @@
 
 namespace SportivaWeb.Services
 {
-    public interface ICuentaService
+    public interface ISesionService
     {
         UsuarioModel? Usuario { get; set; }
 
@@ -12,7 +12,7 @@ namespace SportivaWeb.Services
         void IniciarSesion(UsuarioModel usuario);
     }
 
-    public class CuentaService : ICuentaService
+    public class SesionService : ISesionService
     {
         public UsuarioModel? Usuario { get; set; }
 
