@@ -1,25 +1,25 @@
-﻿@layout CuentaLayout
-@page "/cuenta/registrarse"
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.Data.SqlClient
-@using SportivaWeb.Components.Layout
-@using SportivaWeb.Models.DB
+﻿@page "/cuenta/registrarse"
 @inject IConfiguration configuration
+@inject IUsuariosService usuariosService
 @inject NavigationManager navigationManager
+@using Microsoft.Data.SqlClient
+@using SportivaWeb.Models.DB
+@using SportivaWeb.Services
+@using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
 
 <PageTitle>Sportiva - Registrarse</PageTitle>
 
-<!-- Contenedor -->
 <FluentStack Orientation="Orientation.Vertical"
 			 HorizontalAlignment="HorizontalAlignment.Center">
-	<h1>Registrarse</h1>
+	<h2>Registrarse</h2>
 
-	<!-- Predeterminadamente es horizontal -->
 	<FluentStack Width="auto">
-		<!-- Etiquetas -->
 		<FluentStack Orientation="Orientation.Vertical"
 					 Style="align-items: end;">
+			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
+				Nombre:
+			</FluentLabel>
 			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
 				Email:
 			</FluentLabel>
@@ -29,10 +29,18 @@
 			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
 				Confirmación de contraseña:
 			</FluentLabel>
+
+			<FluentSpacer />
+
+			<FluentButton Appearance="Appearance.Accent"
+						  @onclick="@(() => navigationManager.NavigateTo("/"))">
+				Cancelar
+			</FluentButton>
 		</FluentStack>
 
-		<!-- Campos y botón -->
 		<FluentStack Orientation="Orientation.Vertical">
+			<FluentTextField Style="width: inherit;"
+							 @bind-Value="usuario.Nombre" />
 			<FluentTextField Style="width: inherit;"
 							 @bind-Value="usuario.Email" />
 			<FluentTextField TextFieldType="TextFieldType.Password"
@@ -46,13 +54,11 @@
 
 			<FluentStack VerticalAlignment="VerticalAlignment.Center"
 						 Width="max-content">
-				<!-- Botón con acción -->
 				<FluentButton Appearance="Appearance.Accent"
-							  @onclick="IniciarSesionUsuario">
+							  @onclick="RegistrarAsync">
 					Registrarse
 				</FluentButton>
 
-				<!-- Redirección a la página de iniciar sesión en caso de tener cuenta -->
 				<span>Ya tenés cuenta? <a href="@link">Iniciá sesión</a></span>
 			</FluentStack>
 		</FluentStack>
@@ -60,81 +66,64 @@
 
 	<FluentSpacer />
 
-	<!-- Mensaje -->
 	@if (!string.IsNullOrEmpty(mensaje))
 	{
-		<span>@mensaje</span>
+		<span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
 	}
 </FluentStack>
 
 @code {
-	private Usuario usuario = new();
+	private UsuarioModel usuario = new();
 	private string confirmacion = string.Empty;
 	private string link = "/cuenta/iniciar-sesion";
 	private string? mensaje;
 
-	private async Task IniciarSesionUsuario()
+	private async Task RegistrarAsync()
 	{
-		// Limpiar el mensaje por cada acción
 		mensaje = string.Empty;
+		List<string> mensajes = [];
 
-		#region Validación en el modelo
-		// Obtener mensaje en caso de que los valores no sean válidos
-		var context = new ValidationContext(usuario);
-		var results = new List<ValidationResult>();
+		var contexto = new ValidationContext(usuario);
+		var resultados = new List<ValidationResult>();
 
-		if (!Validator.TryValidateObject(usuario, context, results, true))
-		{
-			// Ejemplo: "Ingrese email. Ingrese contraseña."
-			mensaje = string.Join("\n", results.Select(r => r.ErrorMessage));
-			return;
-		}
-		if (string.IsNullOrEmpty(confirmacion))
-		{
-			mensaje = "Confirme la contraseña.";
-			return;
-		}
-		if (confirmacion != usuario.Contra)
-		{
-			mensaje = "La confirmación de contraseña no coincide con la misma.";
-			return;
-		}
-		#endregion
+		Validator.TryValidateObject(usuario, contexto, resultados, true);
 
-		#region Validación en la base de datos
-		// Conectarse a la base de datos
-		using (var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
-		{
-			await conexion.OpenAsync();
+		mensajes.AddRange(resultados.Select(r => r.ErrorMessage!));
 
-			// Chequear que no exista el email ingresado
-			using (var emailComando = new SqlCommand($"SELECT COUNT(*) FROM Usuarios WHERE Email = @Email", conexion))
+		bool esValida = !resultados.Any(r => r.MemberNames.Contains(nameof(usuario.Contra)));
+
+		if (esValida)
+		{
+			if (string.IsNullOrWhiteSpace(confirmacion))
 			{
-				emailComando.Parameters.AddWithValue("@Email", usuario.Email);
-
-				if (Convert.ToInt32(await emailComando.ExecuteScalarAsync()) > 0)
-				{
-					mensaje = "El correo ya está registrado.";
-					return;
-				}
+				mensajes.Add("Confirme la contraseña.");
 			}
-
-			// Insertar los valores
-			using (var usuarioComando = new SqlCommand("INSERT INTO Usuarios (Email, Contra) VALUES (@Email, @Contra)", conexion))
+			else if (confirmacion != usuario.Contra)
 			{
-				usuarioComando.Parameters.AddWithValue("@Email", usuario.Email);
-				usuarioComando.Parameters.AddWithValue("@Contra", usuario.Contra);
-
-				await usuarioComando.ExecuteNonQueryAsync();
+				mensajes.Add("La confirmación de contraseña no coincide con la misma.");
 			}
 		}
-		#endregion
 
-		// Redireccionar a la página de iniciar sesión
-		mensaje = "Usuario registrado correctamente. Redirigiendo al inicio de sesión...";
-		StateHasChanged();
+		var nombreExiste = await usuariosService.NombreExisteAsync(usuario.Nombre);
 
-		await Task.Delay(2000);
+		if (!string.IsNullOrWhiteSpace(usuario.Nombre) && nombreExiste)
+		{
+			mensajes.Add("El nombre de usuario ya está registrado.");
+		}
+
+		var emailExiste = await usuariosService.EmailExisteAsync(usuario.Email);
+
+		if (!string.IsNullOrWhiteSpace(usuario.Email) && emailExiste)
+		{
+			mensajes.Add("El correo ya está registrado.");
+		}
+		if (mensajes.Any())
+		{
+			mensaje = string.Join("<br />", mensajes);
+			return;
+		}
+
+		await usuariosService.AgregarAsync(usuario);
 		navigationManager.NavigateTo(link);
 	}
 }

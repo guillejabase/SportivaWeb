@@ -1,135 +1,105 @@
-﻿@layout CuentaLayout
-@page "/cuenta/iniciar-sesion"
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.Data.SqlClient
-@using SportivaWeb.Components.Layout
-@using SportivaWeb.Models.DB
+﻿@page "/cuenta/iniciar-sesion"
 @inject IConfiguration configuration
+@inject ISesionService sesionService
+@inject IUsuariosService usuariosService
 @inject NavigationManager navigationManager
+@using Microsoft.Data.SqlClient
+@using SportivaWeb.Models.DB
+@using SportivaWeb.Services
 @rendermode InteractiveServer
 
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
 
-<!-- Contenedor -->
 <FluentStack Orientation="Orientation.Vertical"
-			 HorizontalAlignment="HorizontalAlignment.Center">
-	<h1>Iniciar sesión</h1>
+             HorizontalAlignment="HorizontalAlignment.Center">
+    <h2>Iniciar sesión</h2>
 
-	<!-- Predeterminadamente es horizontal -->
-	<FluentStack Width="auto">
-		<!-- Etiquetas -->
-		<FluentStack Orientation="Orientation.Vertical"
-					 Style="align-items: end;">
-			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
-				Email:
-			</FluentLabel>
-			<FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
-				Contraseña:
-			</FluentLabel>
-		</FluentStack>
+    <FluentStack Width="auto">
+        <FluentStack Orientation="Orientation.Vertical"
+                     Style="align-items: end">
+            <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
+                Nombre de usuario:
+            </FluentLabel>
+            <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
+                Contraseña:
+            </FluentLabel>
 
-		<!-- Campos y botón -->
-		<FluentStack Orientation="Orientation.Vertical">
-			<FluentTextField Style="width: inherit;"
-							 @bind-Value="usuario.Email" />
-			<FluentTextField TextFieldType="TextFieldType.Password"
-							 Style="width: inherit;"
-							 @bind-Value="usuario.Contra" />
+            <FluentSpacer />
 
-			<FluentSpacer />
+            <FluentButton Appearance="Appearance.Accent"
+                          @onclick="@(() => navigationManager.NavigateTo("/"))">
+                Cancelar
+            </FluentButton>
+        </FluentStack>
 
-			<FluentStack VerticalAlignment="VerticalAlignment.Center"
-						 Width="max-content">
-				<!-- Botón con acción -->
-				<FluentButton Appearance="Appearance.Accent"
-							  @onclick="IniciarSesionUsuario">
-					Iniciar sesión
-				</FluentButton>
+        <FluentStack Orientation="Orientation.Vertical">
+            <FluentTextField Style="width: inherit"
+                             @bind-Value="nombre" />
+            <FluentTextField TextFieldType="TextFieldType.Password"
+                             Style="width: inherit"
+                             @bind-Value="contra" />
 
-				<!-- Redirección a la página de registrarse en caso de no tener cuenta -->
-				<span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
-			</FluentStack>
-		</FluentStack>
-	</FluentStack>
+            <FluentSpacer />
 
-	<FluentSpacer />
+            <FluentStack VerticalAlignment="VerticalAlignment.Center"
+                         Width="max-content">
+                <FluentButton Appearance="Appearance.Accent"
+                              @onclick="AccederAsync">
+                    Iniciar sesión
+                </FluentButton>
 
-	<!-- Mensaje -->
-	@if (!string.IsNullOrEmpty(mensaje))
-	{
-		<span>@mensaje</span>
-	}
+                <span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
+            </FluentStack>
+        </FluentStack>
+    </FluentStack>
+
+    <FluentSpacer />
+
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
+    }
 </FluentStack>
 
 @code {
-	private Usuario usuario = new();
-	private string? mensaje;
+    private string nombre = string.Empty;
+    private string contra = string.Empty;
+    private string? mensaje;
 
-	private async Task IniciarSesionUsuario()
-	{
-		// Limpiar el mensaje por cada acción
-		mensaje = string.Empty;
+    private async Task AccederAsync()
+    {
+        mensaje = string.Empty;
 
-		#region Validación en el modelo
-		// Chequear que los valores no estén vacíos
-		if (string.IsNullOrEmpty(usuario.Email) || string.IsNullOrEmpty(usuario.Contra))
-		{
-			List<string> mensajes = [];
+        if (string.IsNullOrEmpty(nombre) && string.IsNullOrEmpty(contra))
+        {
+            mensaje = "Ingrese nombre de usuario.<br />Ingrese contraseña.";
+            return;
+        }
+        if (string.IsNullOrEmpty(nombre))
+        {
+            mensaje = "Ingrese nombre de usuario.";
+            return;
+        }
 
-			if (string.IsNullOrEmpty(usuario.Email))
-			{
-				mensajes.Add("Ingrese email.");
-			}
-			if (string.IsNullOrEmpty(usuario.Contra))
-			{
-				mensajes.Add("Ingrese contraseña.");
-			}
+        var resultado = await usuariosService.ValidarCredencialesAsync(nombre, contra);
 
-			mensaje = string.Join(" ", mensajes);
-			return;
-		}
-		#endregion
+        if (!resultado.Existe)
+        {
+            mensaje = "El nombre de usuario no está registrado.";
+            return;
+        }
+        if (string.IsNullOrEmpty(contra))
+        {
+            mensaje = "Ingrese contraseña.";
+            return;
+        }
+        if (resultado.Usuario == null)
+        {
+            mensaje = "La contraseña es incorrecta.";
+            return;
+        }
 
-		#region Validación en la base de datos
-		// Conectarse a la base de datos
-		using (var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
-		{
-			await conexion.OpenAsync();
-
-			var select = "SELECT COUNT(1) FROM Usuarios";
-
-			// Chequear que exista el email ingresado
-			using (var emailComando = new SqlCommand($"{select} WHERE Email = @Email", conexion))
-			{
-				emailComando.Parameters.AddWithValue("@Email", usuario.Email);
-
-				if (Convert.ToInt32(await emailComando.ExecuteScalarAsync()) == 0)
-				{
-					mensaje = "Este email no está registrado.";
-					return;
-				}
-			}
-
-			// Chequear que la contraseña sea la correcta
-			using (var contraComando = new SqlCommand($"{select} WHERE Email = @Email AND Contra = @Contra", conexion))
-			{
-				contraComando.Parameters.AddWithValue("@Email", usuario.Email);
-				contraComando.Parameters.AddWithValue("@Contra", usuario.Contra);
-
-				if (Convert.ToInt32(await contraComando.ExecuteScalarAsync()) == 0)
-				{
-					mensaje = "La contraseña es incorrecta.";
-					return;
-				}
-			}
-		}
-		#endregion
-
-		// Redireccionar a la página de inicio
-		mensaje = "Sesión iniciada. Dirigiendo al inicio...";
-		StateHasChanged();
-
-		await Task.Delay(2000);
-		navigationManager.NavigateTo("/");
-	}
+        sesionService.IniciarSesion(resultado.Usuario);
+        navigationManager.NavigateTo("/");
+    }
 }

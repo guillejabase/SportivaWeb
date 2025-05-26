@@ -4,8 +4,8 @@ namespace SportivaWeb.Models
 {
     public class NavItem
     {
-        public required string Href { get; set; }
-        public required Icon Icon { get; set; }
-        public required string Title { get; set; }
+        public required string Ruta { get; set; }
+        public required Icon Icono { get; set; }
+        public required string Titulo { get; set; }
     }
 }

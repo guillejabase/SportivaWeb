@@ -2,9 +2,14 @@
 
 namespace SportivaWeb.Models.DB
 {
-    public class Usuario
+    public class UsuarioModel
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Ingrese nombre.")]
+        [MaxLength(32, ErrorMessage = "El nombre debe tener un máximo de 16 caracteres.")]
+        [RegularExpression(@"^[^\s]*$", ErrorMessage = "La contraseña no puede contener espacios.")]
+        public string Nombre { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ingrese email.")]
         [EmailAddress(ErrorMessage = "El email es inválido.")]

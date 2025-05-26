@@ -1,25 +1,63 @@
-﻿@inject NavigationManager NavigationManager
+﻿@implements IDisposable
+@inject ISesionService sesionService
+@inject NavigationManager navigationManager
+@using SportivaWeb.Services
 @rendermode InteractiveServer
 
-<FluentDesignTheme @bind-Mode="ThemeMode" />
+<FluentDesignTheme @bind-Mode="modo"
+                   CustomColor="#00FFE0" />
 
 <FluentHeader>
-	<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-		<a href="/" style="text-decoration: none; color: var(--neutral-layer-1);">Sportiva</a>
+    <FluentStack Orientation="Orientation.Horizontal"
+                 VerticalAlignment="VerticalAlignment.Center"
+                 Style="font-size: 24px">
+        <a href="/" style="text-decoration: none; color: var(--neutral-layer-1);">Sportiva</a>
 
-		<FluentSpacer />
+        <FluentSpacer />
 
-		<FluentIcon Value="@(new Icons.Regular.Size20.ArrowExit())"
-					Color="Color.Lightweight"
-					Title="Cerrar sesión"
-					@onclick="@(() => NavigationManager.NavigateTo("/cuenta/iniciar-sesion"))" />
-		<FluentIcon Value="@(ThemeMode == DesignThemeModes.Dark ? (Icon)new Icons.Regular.Size20.WeatherSunny() : (Icon)new Icons.Regular.Size20.WeatherMoon())"
-					Color="Color.Lightweight"
-					Title="@(ThemeMode == DesignThemeModes.Dark ? "Modo claro" : "Modo oscuro")"
-					@onclick="@(() => ThemeMode = ThemeMode == DesignThemeModes.Dark ? DesignThemeModes.Light : DesignThemeModes.Dark)" />
-	</FluentStack>
+        @if (sesionService.Usuario == null)
+        {
+            <FluentIcon Value="@(new Icons.Regular.Size24.Person())"
+                        Color="Color.Lightweight"
+                        Title="Iniciar sesión"
+                        @onclick="@(() => navigationManager.NavigateTo("/cuenta/iniciar-sesion"))" />
+        }
+        else
+        {
+            <FluentIcon Value="@(new Icons.Regular.Size24.ArrowForwardDownPerson())"
+                        Color="Color.Lightweight"
+                        Title="Cerrar sesión"
+                        @onclick="CerrarSesion" />
+        }
+
+        <FluentIcon Value="@(modo == DesignThemeModes.Dark ? (Icon)new Icons.Regular.Size24.WeatherSunny() : (Icon)new Icons.Regular.Size24.WeatherMoon())"
+                    Color="Color.Lightweight"
+                    Title="@(modo == DesignThemeModes.Dark ? "Modo claro" : "Modo oscuro")"
+                    @onclick="@(() => modo = modo == DesignThemeModes.Dark ? DesignThemeModes.Light : DesignThemeModes.Dark)" />
+    </FluentStack>
 </FluentHeader>
 
 @code {
-	private DesignThemeModes ThemeMode = DesignThemeModes.Light;
+    private DesignThemeModes modo = DesignThemeModes.Light;
+
+    private void Invocar()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnInitialized()
+    {
+        sesionService.EnSesionCambiada += Invocar;
+    }
+
+    public void Dispose()
+    {
+        sesionService.EnSesionCambiada -= Invocar;
+    }
+
+    private void CerrarSesion()
+    {
+        sesionService.CerrarSesion();
+        navigationManager.NavigateTo("/cuenta/sesion-cerrada");
+    }
 }

@@ -1,5 +1,6 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using SportivaWeb.Components;
+using SportivaWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
+
+builder.Services.AddScoped<IEventosService, EventosService>();
+builder.Services.AddScoped<IUsuariosService, UsuariosService>();
+
+builder.Services.AddSingleton<ISesionService, SesionService>();
 
 var app = builder.Build();
 

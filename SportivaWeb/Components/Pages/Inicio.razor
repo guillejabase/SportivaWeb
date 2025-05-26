@@ -1,9 +1,42 @@
 ﻿@page "/"
+@using SportivaWeb.Models.DB;
+@using SportivaWeb.Services;
+@inject IEventosService eventosService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Sportiva - Inicio</PageTitle>
 
 <FluentStack HorizontalAlignment="HorizontalAlignment.Center">
-	<h1>Inicio</h1>
+	<h2>Inicio</h2>
 </FluentStack>
 
-<span>Bienvenidos a Sportiva!</span>
+<FluentStack>
+    <FluentGrid Spacing="2">
+        @foreach (var evento in eventos)
+        {
+            <FluentGridItem>
+                <FluentCard Width="250px"
+                            @onclick="@(() => navigationManager.NavigateTo($"eventos/{evento.Id}"))">
+                    <FluentStack Orientation="Orientation.Vertical">
+                        <FluentStack Orientation="Orientation.Vertical">
+                            <FluentStack Orientation="Orientation.Vertical"
+                                         VerticalGap="0">
+                                <h4 style="margin-bottom: 6px;">@evento.Nombre</h4>
+                            </FluentStack>
+                        </FluentStack>
+                    </FluentStack>
+                </FluentCard>
+            </FluentGridItem>
+        }
+    </FluentGrid>
+</FluentStack>
+
+@code {
+    private List<EventoModel> eventos = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        eventos = await eventosService.ObtenerAsync();
+    }
+}
