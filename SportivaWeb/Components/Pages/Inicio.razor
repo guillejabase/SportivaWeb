@@ -51,7 +51,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        eventos = await eventosService.ObtenerAsync();
+        eventos = await eventosService.ObtenerListaAsync();
         provincias = await provinciasService.ObtenerDiccionarioAsync();
     }
 }

@@ -58,9 +58,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var todosEventos = await eventosService.ObtenerAsync();
-
+        var todosEventos = await eventosService.ObtenerListaAsync();
         eventos = todosEventos.FindAll(e => e.Usuario == sesionService.Usuario?.Id);
+
         provincias = await provinciasService.ObtenerDiccionarioAsync();
     }
 }

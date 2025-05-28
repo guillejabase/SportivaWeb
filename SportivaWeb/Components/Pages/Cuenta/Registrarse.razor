@@ -10,24 +10,32 @@
 
 <PageTitle>Sportiva - Registrarse</PageTitle>
 
-<div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+<div style="height: 100%; display: flex; align-items: center; justify-content: center">
     <FluentStack Orientation="Orientation.Vertical"
                  HorizontalAlignment="HorizontalAlignment.Center">
         <h2 style="margin-bottom: 12px">Registrarse</h2>
 
         <FluentStack Width="auto">
             <FluentStack Orientation="Orientation.Vertical"
-                         Style="align-items: end;">
-                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                         Style="align-items: end">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
                     Nombre de usuario:
                 </FluentLabel>
-                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
                     Email:
                 </FluentLabel>
-                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
                     Contraseña:
                 </FluentLabel>
-                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
                     Confirmación de contraseña:
                 </FluentLabel>
 
@@ -40,15 +48,15 @@
             </FluentStack>
 
             <FluentStack Orientation="Orientation.Vertical">
-                <FluentTextField Style="width: inherit;"
+                <FluentTextField Style="width: inherit"
                                  @bind-Value="usuario.Nombre" />
-                <FluentTextField Style="width: inherit;"
+                <FluentTextField Style="width: inherit"
                                  @bind-Value="usuario.Email" />
                 <FluentTextField TextFieldType="TextFieldType.Password"
-                                 Style="width: inherit;"
+                                 Style="width: inherit"
                                  @bind-Value="usuario.Contra" />
                 <FluentTextField TextFieldType="TextFieldType.Password"
-                                 Style="width: inherit;"
+                                 Style="width: inherit"
                                  @bind-Value="confirmacion" />
 
                 <FluentSpacer />
@@ -60,14 +68,14 @@
                         Registrarse
                     </FluentButton>
 
-                    <span>Ya tenés cuenta? <a href="@link">Iniciá sesión</a></span>
+                    <span>Ya tenés cuenta? <a href="/cuenta/iniciar-sesion">Iniciá sesión</a></span>
                 </FluentStack>
             </FluentStack>
         </FluentStack>
 
         <FluentSpacer />
 
-        @if (!string.IsNullOrEmpty(mensaje))
+        @if (!string.IsNullOrWhiteSpace(mensaje))
         {
             <span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
         }
@@ -77,7 +85,6 @@
 @code {
     private UsuarioModel usuario = new();
     private string confirmacion = string.Empty;
-    private string link = "/cuenta/iniciar-sesion";
     private string? mensaje;
 
     private async Task RegistrarAsync()
@@ -128,6 +135,6 @@
         usuario.Rol = 2;
 
         await usuariosService.AgregarAsync(usuario);
-        navigationManager.NavigateTo(link);
+        navigationManager.NavigateTo("/cuenta/iniciar-sesion");
     }
 }

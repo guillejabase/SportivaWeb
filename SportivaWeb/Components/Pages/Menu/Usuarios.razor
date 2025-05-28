@@ -28,7 +28,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        usuarios = await usuariosService.ObtenerAsync();
+        usuarios = await usuariosService.ObtenerListaAsync();
         roles = await rolesService.ObtenerDiccionarioAsync();
     }
 }

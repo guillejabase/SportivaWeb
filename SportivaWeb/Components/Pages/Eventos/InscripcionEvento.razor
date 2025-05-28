@@ -1,0 +1,225 @@
+﻿@page "/eventos/{Id:int}/inscripcion"
+@inject IEventosService eventosService
+@inject IInscriptosService inscriptosService
+@inject IInscripcionesService inscripcionesService
+@inject IProvinciasService provinciasService
+@inject ISexosService sexosService
+@inject NavigationManager navigationManager
+@using Microsoft.Data.SqlClient
+@using SportivaWeb.Models.DB;
+@using SportivaWeb.Services;
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveServer
+
+<PageTitle>Sportiva - Inscripción</PageTitle>
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+             Style="margin: 12px 0">
+    <h2>Inscripción a evento:</h2> <h2 style="font-weight: normal">@evento.Nombre</h2>
+</FluentStack>
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center">
+    <FluentStack Orientation="Orientation.Vertical"
+                 Width="1000px">
+        <FluentButton Appearance="Appearance.Accent"
+                      @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}"))">
+            Volver
+        </FluentButton>
+
+        <FluentSpacer />
+
+        <FluentStack Orientation="Orientation.Vertical"
+                     HorizontalAlignment="HorizontalAlignment.Center">
+            <FluentStack Width="auto">
+                <FluentStack Orientation="Orientation.Vertical"
+                             Style="align-items: end">
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Email:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Nombres:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Apellidos:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Fecha de nacimiento:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Sexo:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        DNI:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Provincia:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Código postal:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 MarginBlock="6px"
+                                 Alignment="HorizontalAlignment.End">
+                        Teléfono:
+                    </FluentLabel>
+                </FluentStack>
+
+                <FluentStack Orientation="Orientation.Vertical"
+                             Width="300px">
+                    <FluentTextField TextFieldType="TextFieldType.Email"
+                                     Style="width: inherit"
+                                     @bind-Value="inscripto.Email" />
+                    <FluentTextField Style="width: inherit"
+                                     @bind-Value="inscripto.Nombres" />
+                    <FluentTextField Style="width: inherit"
+                                     @bind-Value="inscripto.Apellidos" />
+                    <FluentDatePicker Style="width: inherit"
+                                      Value="fechaNaci"
+                                      ValueChanged="EventCallback.Factory.Create<DateTime?>(this, v => fechaNaci = v)" />
+                    <FluentSelect TOption="SexoModel"
+                                  Items="sexos"
+                                  Height="200px"
+                                  Width="inherit"
+                                  OptionValue="o => o.Id.ToString()"
+                                  OptionText="o => o.Nombre"
+                                  @bind-Value="sexo" />
+                    <FluentTextField TextFieldType="TextFieldType.Number"
+                                     Style="width: inherit"
+                                     @bind-Value="inscripto.DNI" />
+                    <FluentSelect TOption="ProvinciaModel"
+                                  Items="provincias"
+                                  Height="200px"
+                                  Width="inherit"
+                                  OptionValue="o => o.Id.ToString()"
+                                  OptionText="o => o.Nombre"
+                                  @bind-Value="provincia" />
+                    <FluentTextField TextFieldType="TextFieldType.Number"
+                                     Style="width: inherit"
+                                     @bind-Value="inscripto.CodPostal" />
+                    <FluentTextField TextFieldType="TextFieldType.Tel"
+                                     Style="width: inherit"
+                                     @bind-Value="inscripto.Telefono" />
+
+                    <FluentSpacer />
+
+                    <FluentButton Appearance="Appearance.Accent"
+                                  @onclick="ConfirmarAsync">
+                        Confirmar Inscripción
+                    </FluentButton>
+                </FluentStack>
+            </FluentStack>
+
+            <FluentSpacer />
+
+            @if (!string.IsNullOrWhiteSpace(mensaje))
+            {
+                <span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
+            }
+        </FluentStack>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EventoModel evento = new();
+    private InscriptoModel inscripto = new();
+    private DateTime? fechaNaci
+    {
+        get => inscripto.FechaNaci;
+        set { if (value.HasValue) inscripto.FechaNaci = value.Value; }
+    }
+    private List<SexoModel> sexos = [];
+    private List<ProvinciaModel> provincias = [];
+    private string? sexo;
+    private string? provincia;
+    private string? mensaje;
+
+    protected override async Task OnInitializedAsync()
+    {
+        evento = (await eventosService.ObtenerAsync(Id))!;
+        sexos = await sexosService.ObtenerListaAsync();
+        provincias = await provinciasService.ObtenerListaAsync();
+    }
+
+    private async Task ConfirmarAsync()
+    {
+        mensaje = string.Empty;
+        List<string> mensajes = [];
+
+        var contexto = new ValidationContext(inscripto);
+        var resultados = new List<ValidationResult>();
+
+        Validator.TryValidateObject(inscripto, contexto, resultados, true);
+
+        mensajes.AddRange(resultados.Select(r => r.ErrorMessage!));
+
+        if (mensajes.Any())
+        {
+            mensaje = string.Join("<br />", mensajes);
+            return;
+        }
+
+        inscripto.Sexo = Convert.ToInt32(sexo);
+        inscripto.Provincia = Convert.ToInt32(provincia);
+
+        try
+        {
+            await inscriptosService.AgregarAsync(inscripto);
+        }
+        catch (SqlException ex) when (ex.Number == 2627)
+        {
+            mensaje = "Ya existe un inscripto con ese Email o DNI.";
+            return;
+        }
+
+        var inscriptos = await inscriptosService.ObtenerListaAsync();
+        var existente = inscriptos.FirstOrDefault(i => i.DNI == inscripto.DNI || i.Email == inscripto.Email);
+
+        if (existente is null)
+        {
+            mensaje = "Error interno: No se pudo recuperar el ID del inscripto.";
+            return;
+        }
+
+        var inscripcion = new InscripcionModel
+        {
+            Inscripto = existente.Id,
+            Evento = Id,
+            Fecha = DateTime.Now
+        };
+
+        try
+        {
+            await inscripcionesService.AgregarAsync(inscripcion);
+        }
+        catch (SqlException ex) when (ex.Number == 2627)
+        {
+            mensaje = "Ya estás inscripto a este evento.";
+            return;
+        }
+
+        mensaje = "Inscripción existosa. Espere...";
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        navigationManager.NavigateTo($"/eventos/{Id}");
+    }
+}

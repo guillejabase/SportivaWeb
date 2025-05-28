@@ -5,17 +5,17 @@ namespace SportivaWeb.Services
 {
     public interface IEventosService
     {
-        Task<List<EventoModel>> ObtenerAsync();
+        Task<EventoModel?> ObtenerAsync(int id);
+        Task<List<EventoModel>> ObtenerListaAsync();
     }
 
     public class EventosService(IConfiguration configuration) : IEventosService
     {
-        public async Task<List<EventoModel>> ObtenerAsync()
+        public async Task<List<EventoModel>> ObtenerListaAsync()
         {
             List<EventoModel> lista = [];
 
             using var conexion = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
-
             await conexion.OpenAsync();
 
             using var comando = new SqlCommand("SELECT * FROM Eventos", conexion);
@@ -39,6 +39,12 @@ namespace SportivaWeb.Services
             }
 
             return lista;
+        }
+
+        public async Task<EventoModel?> ObtenerAsync(int id)
+        {
+            var lista = await ObtenerListaAsync();
+            return lista.FirstOrDefault(o => o.Id == id);
         }
     }
 }

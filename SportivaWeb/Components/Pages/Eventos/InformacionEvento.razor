@@ -1,0 +1,66 @@
+﻿@page "/eventos/{Id:int}"
+@using SportivaWeb.Models.DB;
+@using SportivaWeb.Services;
+@using System.Globalization
+@inject IEventosService eventosService
+@inject IProvinciasService provinciasService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Sportiva - Evento</PageTitle>
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+             Style="margin: 12px 0">
+    <h2>Información de evento:</h2> <h2 style="font-weight: normal">@evento.Nombre</h2>
+</FluentStack>
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center">
+    <FluentStack Orientation="Orientation.Vertical"
+                 Width="1000px">
+        <FluentButton Appearance="Appearance.Accent"
+                      @onclick="@(() => navigationManager.NavigateTo($"/"))">
+            Volver
+        </FluentButton>
+
+        <img src="/images/eventos/@evento.Imagen"
+             style="width: 100%; max-width: 1000px; aspect-ratio: 2/1; object-fit: cover; object-position: center; border-radius: 4px" />
+
+        <span>
+            <strong>Fecha de inscripción:</strong> @evento.FechaApeIns.ToString("dd/MM/yyyy") - @evento.FechaCieIns.ToString("dd/MM/yyyy")
+        </span>
+        <span>
+            <strong>Ubicación:</strong> @provincia
+        </span>
+        <span>
+            <strong>Fecha de inicio:</strong> @evento.FechaInicio.ToString("dd/MM/yyyy")
+        </span>
+        <span>
+            <strong>Descripción:</strong> @(!string.IsNullOrWhiteSpace(evento.Descri) ? evento.Descri : "Ninguna")
+        </span>
+        <span>
+            <strong>Precio:</strong> $@evento.Precio.ToString("N2", new CultureInfo("es-AR"))
+        </span>
+
+        <FluentButton Appearance="Appearance.Accent"
+                      @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}/inscripcion"))">
+            Inscribirse
+        </FluentButton>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EventoModel evento = new();
+    private string provincia = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var eventos = await eventosService.ObtenerListaAsync();
+        evento = eventos.First(e => e.Id == Id);
+
+        var provincias = await provinciasService.ObtenerDiccionarioAsync();
+        provincia = provincias[evento.Provincia];
+    }
+}

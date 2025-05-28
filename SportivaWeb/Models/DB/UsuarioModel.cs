@@ -7,8 +7,8 @@ namespace SportivaWeb.Models.DB
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Ingrese nombre.")]
-        [MaxLength(32, ErrorMessage = "El nombre debe tener un máximo de 16 caracteres.")]
-        [RegularExpression(@"^[^\s]*$", ErrorMessage = "La contraseña no puede contener espacios.")]
+        [MaxLength(16, ErrorMessage = "El nombre debe tener un máximo de 16 caracteres.")]
+        [RegularExpression(@"^[^\s]*$", ErrorMessage = "El nombre no puede contener espacios.")]
         public string Nombre { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ingrese email.")]
@@ -21,6 +21,6 @@ namespace SportivaWeb.Models.DB
         [RegularExpression(@"^[^\s]*$", ErrorMessage = "La contraseña no puede contener espacios.")]
         public string Contra { get; set; } = string.Empty;
 
-        public int Rol { get; set; }
+        public int Rol { get; set; } // FK RolModel
     }
 }

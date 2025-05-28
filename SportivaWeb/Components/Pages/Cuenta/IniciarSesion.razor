@@ -10,7 +10,7 @@
 
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
 
-<div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+<div style="height: 100%; display: flex; align-items: center; justify-content: center">
     <FluentStack Orientation="Orientation.Vertical"
                  HorizontalAlignment="HorizontalAlignment.Center">
         <h2 style="margin-bottom: 12px">Iniciar sesión</h2>
@@ -18,10 +18,14 @@
         <FluentStack Width="auto">
             <FluentStack Orientation="Orientation.Vertical"
                          Style="align-items: end">
-                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
                     Nombre de usuario o email:
                 </FluentLabel>
-                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
                     Contraseña:
                 </FluentLabel>
 
@@ -56,7 +60,7 @@
 
         <FluentSpacer />
 
-        @if (!string.IsNullOrEmpty(mensaje))
+        @if (!string.IsNullOrWhiteSpace(mensaje))
         {
             <span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
         }
@@ -72,12 +76,12 @@
     {
         mensaje = string.Empty;
 
-        if (string.IsNullOrEmpty(nombreOEmail) && string.IsNullOrEmpty(contra))
+        if (string.IsNullOrWhiteSpace(nombreOEmail) && string.IsNullOrWhiteSpace(contra))
         {
             mensaje = "Ingrese nombre de usuario o email.<br />Ingrese contraseña.";
             return;
         }
-        if (string.IsNullOrEmpty(nombreOEmail))
+        if (string.IsNullOrWhiteSpace(nombreOEmail))
         {
             mensaje = "Ingrese nombre de usuario o email.";
             return;
@@ -90,7 +94,7 @@
             mensaje = "El nombre de usuario o email no está registrado.";
             return;
         }
-        if (string.IsNullOrEmpty(contra))
+        if (string.IsNullOrWhiteSpace(contra))
         {
             mensaje = "Ingrese contraseña.";
             return;
@@ -101,7 +105,7 @@
             return;
         }
 
-        sesionService.IniciarSesion(resultado.Usuario);
+        sesionService.Iniciar(resultado.Usuario);
         navigationManager.NavigateTo(sesionService.Usuario?.Rol == 1 ? "/menu/usuarios" : "/menu/eventos");
     }
 }

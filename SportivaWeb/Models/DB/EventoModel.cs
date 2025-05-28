@@ -23,12 +23,13 @@ namespace SportivaWeb.Models.DB
         public DateTime FechaInicio { get; set; }
 
         [Required(ErrorMessage = "Ingrese provincia.")]
-        public int Provincia { get; set; }
+        public int Provincia { get; set; } // FK ProvinciaModel
 
         public string? Imagen { get; set; }
 
+        [Required(ErrorMessage = "Ingrese precio.")]
         public decimal Precio { get; set; }
 
-        public int Usuario { get; set; }
+        public int Usuario { get; set; } // FK UsuarioModel
     }
 }

@@ -8,8 +8,8 @@ namespace SportivaWeb.Services
 
         event Action? EnSesionCambiada;
 
-        void CerrarSesion();
-        void IniciarSesion(UsuarioModel usuario);
+        void Cerrar();
+        void Iniciar(UsuarioModel usuario);
     }
 
     public class SesionService : ISesionService
@@ -18,13 +18,13 @@ namespace SportivaWeb.Services
 
         public event Action? EnSesionCambiada;
 
-        public void IniciarSesion(UsuarioModel usuario)
+        public void Iniciar(UsuarioModel usuario)
         {
             Usuario = usuario;
             EnSesionCambiada?.Invoke();
         }
 
-        public void CerrarSesion()
+        public void Cerrar()
         {
             Usuario = null;
             EnSesionCambiada?.Invoke();
