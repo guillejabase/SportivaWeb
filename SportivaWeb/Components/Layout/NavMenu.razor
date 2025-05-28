@@ -1,15 +1,19 @@
-﻿@using SportivaWeb.Models
+﻿@inject ISesionService sesionService
+@using SportivaWeb.Models
+@using SportivaWeb.Services
 @rendermode InteractiveServer
 
 <div class="navmenu">
 	<input type="checkbox"
 		   id="navmenu-toggle"
 		   class="navmenu-icon" />
+
 	<label for="navmenu-toggle"
 		   class="navmenu-icon">
 		<FluentIcon Value="@(new Icons.Regular.Size20.Navigation())"
 					Color="Color.Fill" />
 	</label>
+
 	<nav class="sitenav"
 		 aria-labelledby="main-menu">
 		<FluentNavMenu Id="main-menu"
@@ -20,13 +24,16 @@
 					   @bind-Expanded="expanded">
 			@foreach (var item in navItems)
 			{
-				<FluentNavLink Href="@item.Ruta"
-							   Match="NavLinkMatch.All"
-							   Icon="@item.Icono"
-							   IconColor="Color.Accent"
-							   Tooltip="@item.Titulo">
-					@item.Titulo
-				</FluentNavLink>
+				if (item.Roles.Any(r => r == sesionService.Usuario?.Rol))
+				{
+					<FluentNavLink Href="@item.Ruta"
+								   Match="NavLinkMatch.All"
+								   Icon="@item.Icono"
+								   IconColor="Color.Accent"
+								   Tooltip="@item.Titulo">
+						@item.Titulo
+					</FluentNavLink>
+				}
 			}
 		</FluentNavMenu>
 	</nav>
@@ -37,7 +44,7 @@
 
 	private List<NavItem> navItems = new()
 	{
-		new() { Ruta = "/menu/eventos", Icono = new Icons.Regular.Size24.BoxMultiple(), Titulo = "Eventos" },
-		new() { Ruta = "/menu/usuarios", Icono = new Icons.Regular.Size24.People(), Titulo = "Usuarios" }
+		new() { Ruta = "/menu/eventos", Icono = new Icons.Regular.Size24.BoxMultiple(), Titulo = "Eventos", Roles = [1, 2] },
+		new() { Ruta = "/menu/usuarios", Icono = new Icons.Regular.Size24.People(), Titulo = "Usuarios", Roles = [1] }
 	};
 }

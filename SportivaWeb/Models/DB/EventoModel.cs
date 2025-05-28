@@ -26,5 +26,9 @@ namespace SportivaWeb.Models.DB
         public int Provincia { get; set; }
 
         public string? Imagen { get; set; }
+
+        public decimal Precio { get; set; }
+
+        public int Usuario { get; set; }
     }
 }

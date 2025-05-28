@@ -32,7 +32,9 @@ namespace SportivaWeb.Services
                     FechaCieIns = lector.GetDateTime(lector.GetOrdinal("FechaCieIns")),
                     FechaInicio = lector.GetDateTime(lector.GetOrdinal("FechaInicio")),
                     Provincia = lector.GetInt32(lector.GetOrdinal("Provincia")),
-                    Imagen = lector.GetString(lector.GetOrdinal("Imagen"))
+                    Imagen = lector.GetString(lector.GetOrdinal("Imagen")),
+                    Precio = lector.GetDecimal(lector.GetOrdinal("Precio")),
+                    Usuario = lector.GetInt32(lector.GetOrdinal("Usuario"))
                 });
             }
 

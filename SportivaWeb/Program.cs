@@ -10,6 +10,11 @@ builder.Services.AddRazorComponents()
 builder.Services.AddFluentUIComponents();
 
 builder.Services.AddScoped<IEventosService, EventosService>();
+builder.Services.AddScoped<IInscripcionesService, InscripcionesService>();
+builder.Services.AddScoped<IInscriptosService, InscriptosService>();
+builder.Services.AddScoped<IProvinciasService, ProvinciasService>();
+builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<ISexosService, SexosService>();
 builder.Services.AddScoped<IUsuariosService, UsuariosService>();
 
 builder.Services.AddSingleton<ISesionService, SesionService>();

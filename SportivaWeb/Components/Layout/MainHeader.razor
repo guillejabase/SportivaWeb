@@ -9,25 +9,34 @@
 
 <FluentHeader>
     <FluentStack Orientation="Orientation.Horizontal"
-                 VerticalAlignment="VerticalAlignment.Center"
-                 Style="font-size: 24px">
-        <a href="/" style="text-decoration: none; color: var(--neutral-layer-1);">Sportiva</a>
+                 VerticalAlignment="VerticalAlignment.Center">
+        <a href="@(sesionService.Usuario?.Rol == 1 ? "/menu/usuarios" : (sesionService.Usuario?.Rol == 2 ? "/menu/eventos" : "/"))"
+           style="text-decoration: none; color: var(--neutral-layer-1); font-size: 24px">
+            Sportiva
+        </a>
 
         <FluentSpacer />
 
-        @if (sesionService.Usuario == null)
+        @if (ruta != "cuenta/iniciar-sesion" && ruta != "cuenta/registrarse")
         {
-            <FluentIcon Value="@(new Icons.Regular.Size24.Person())"
-                        Color="Color.Lightweight"
-                        Title="Iniciar sesión"
-                        @onclick="@(() => navigationManager.NavigateTo("/cuenta/iniciar-sesion"))" />
-        }
-        else
-        {
-            <FluentIcon Value="@(new Icons.Regular.Size24.ArrowForwardDownPerson())"
-                        Color="Color.Lightweight"
-                        Title="Cerrar sesión"
-                        @onclick="CerrarSesion" />
+            if (sesionService.Usuario == null)
+            {
+                <FluentIcon Value="@(new Icons.Regular.Size24.Person())"
+                            Color="Color.Lightweight"
+                            Title="Iniciar sesión"
+                            @onclick="@(() => navigationManager.NavigateTo("/cuenta/iniciar-sesion"))" />
+            }
+            else
+            {
+                <span style="font-weight: normal">
+                    @sesionService.Usuario.Nombre / @sesionService.Usuario.Email
+                </span>
+
+                <FluentIcon Value="@(new Icons.Regular.Size24.ArrowForwardDownPerson())"
+                            Color="Color.Lightweight"
+                            Title="Cerrar sesión"
+                            @onclick="CerrarSesion" />
+            }
         }
 
         <FluentIcon Value="@(modo == DesignThemeModes.Dark ? (Icon)new Icons.Regular.Size24.WeatherSunny() : (Icon)new Icons.Regular.Size24.WeatherMoon())"
@@ -39,20 +48,28 @@
 
 @code {
     private DesignThemeModes modo = DesignThemeModes.Light;
+    private string ruta => navigationManager.ToBaseRelativePath(navigationManager.Uri);
 
-    private void Invocar()
+    private void EnUbicacionCambiada(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SesionCambiada()
     {
         InvokeAsync(StateHasChanged);
     }
 
     protected override void OnInitialized()
     {
-        sesionService.EnSesionCambiada += Invocar;
+        navigationManager.LocationChanged += EnUbicacionCambiada;
+        sesionService.EnSesionCambiada += SesionCambiada;
     }
 
     public void Dispose()
     {
-        sesionService.EnSesionCambiada -= Invocar;
+        navigationManager.LocationChanged -= EnUbicacionCambiada;
+        sesionService.EnSesionCambiada -= SesionCambiada;
     }
 
     private void CerrarSesion()

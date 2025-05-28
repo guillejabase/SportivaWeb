@@ -20,5 +20,7 @@ namespace SportivaWeb.Models.DB
         [MaxLength(16, ErrorMessage = "La contraseña debe tener un máximo de 16 caracteres.")]
         [RegularExpression(@"^[^\s]*$", ErrorMessage = "La contraseña no puede contener espacios.")]
         public string Contra { get; set; } = string.Empty;
+
+        public int Rol { get; set; }
     }
 }

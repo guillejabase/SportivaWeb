@@ -10,59 +10,61 @@
 
 <PageTitle>Sportiva - Iniciar sesión</PageTitle>
 
-<FluentStack Orientation="Orientation.Vertical"
-             HorizontalAlignment="HorizontalAlignment.Center">
-    <h2>Iniciar sesión</h2>
+<div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+    <FluentStack Orientation="Orientation.Vertical"
+                 HorizontalAlignment="HorizontalAlignment.Center">
+        <h2 style="margin-bottom: 12px">Iniciar sesión</h2>
 
-    <FluentStack Width="auto">
-        <FluentStack Orientation="Orientation.Vertical"
-                     Style="align-items: end">
-            <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
-                Nombre de usuario:
-            </FluentLabel>
-            <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px">
-                Contraseña:
-            </FluentLabel>
+        <FluentStack Width="auto">
+            <FluentStack Orientation="Orientation.Vertical"
+                         Style="align-items: end">
+                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                    Nombre de usuario o email:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold" MarginBlock="6px" Alignment="HorizontalAlignment.End">
+                    Contraseña:
+                </FluentLabel>
 
-            <FluentSpacer />
+                <FluentSpacer />
 
-            <FluentButton Appearance="Appearance.Accent"
-                          @onclick="@(() => navigationManager.NavigateTo("/"))">
-                Cancelar
-            </FluentButton>
-        </FluentStack>
-
-        <FluentStack Orientation="Orientation.Vertical">
-            <FluentTextField Style="width: inherit"
-                             @bind-Value="nombre" />
-            <FluentTextField TextFieldType="TextFieldType.Password"
-                             Style="width: inherit"
-                             @bind-Value="contra" />
-
-            <FluentSpacer />
-
-            <FluentStack VerticalAlignment="VerticalAlignment.Center"
-                         Width="max-content">
                 <FluentButton Appearance="Appearance.Accent"
-                              @onclick="AccederAsync">
-                    Iniciar sesión
+                              @onclick="@(() => navigationManager.NavigateTo("/"))">
+                    Cancelar
                 </FluentButton>
+            </FluentStack>
 
-                <span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
+            <FluentStack Orientation="Orientation.Vertical">
+                <FluentTextField Style="width: inherit"
+                                 @bind-Value="nombreOEmail" />
+                <FluentTextField TextFieldType="TextFieldType.Password"
+                                 Style="width: inherit"
+                                 @bind-Value="contra" />
+
+                <FluentSpacer />
+
+                <FluentStack VerticalAlignment="VerticalAlignment.Center"
+                             Width="max-content">
+                    <FluentButton Appearance="Appearance.Accent"
+                                  @onclick="AccederAsync">
+                        Iniciar sesión
+                    </FluentButton>
+
+                    <span>No tenés cuenta? <a href="/cuenta/registrarse">Regístrate</a></span>
+                </FluentStack>
             </FluentStack>
         </FluentStack>
+
+        <FluentSpacer />
+
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
+        }
     </FluentStack>
-
-    <FluentSpacer />
-
-    @if (!string.IsNullOrEmpty(mensaje))
-    {
-        <span style="color: red; text-align: center">@((MarkupString)mensaje)</span>
-    }
-</FluentStack>
+</div>
 
 @code {
-    private string nombre = string.Empty;
+    private string nombreOEmail = string.Empty;
     private string contra = string.Empty;
     private string? mensaje;
 
@@ -70,22 +72,22 @@
     {
         mensaje = string.Empty;
 
-        if (string.IsNullOrEmpty(nombre) && string.IsNullOrEmpty(contra))
+        if (string.IsNullOrEmpty(nombreOEmail) && string.IsNullOrEmpty(contra))
         {
-            mensaje = "Ingrese nombre de usuario.<br />Ingrese contraseña.";
+            mensaje = "Ingrese nombre de usuario o email.<br />Ingrese contraseña.";
             return;
         }
-        if (string.IsNullOrEmpty(nombre))
+        if (string.IsNullOrEmpty(nombreOEmail))
         {
-            mensaje = "Ingrese nombre de usuario.";
+            mensaje = "Ingrese nombre de usuario o email.";
             return;
         }
 
-        var resultado = await usuariosService.ValidarCredencialesAsync(nombre, contra);
+        var resultado = await usuariosService.ValidarCredencialesAsync(nombreOEmail, contra);
 
         if (!resultado.Existe)
         {
-            mensaje = "El nombre de usuario no está registrado.";
+            mensaje = "El nombre de usuario o email no está registrado.";
             return;
         }
         if (string.IsNullOrEmpty(contra))
@@ -100,6 +102,6 @@
         }
 
         sesionService.IniciarSesion(resultado.Usuario);
-        navigationManager.NavigateTo("/");
+        navigationManager.NavigateTo(sesionService.Usuario?.Rol == 1 ? "/menu/usuarios" : "/menu/eventos");
     }
 }

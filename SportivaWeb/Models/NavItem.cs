@@ -7,5 +7,6 @@ namespace SportivaWeb.Models
         public required string Ruta { get; set; }
         public required Icon Icono { get; set; }
         public required string Titulo { get; set; }
+        public required int[] Roles { get; set; }
     }
 }

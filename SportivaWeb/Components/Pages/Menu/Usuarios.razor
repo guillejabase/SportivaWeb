@@ -1,7 +1,34 @@
 ﻿@page "/menu/usuarios"
+@inject IRolesService rolesService
+@inject IUsuariosService usuariosService
+@using SportivaWeb.Models.DB
+@using SportivaWeb.Services
+@rendermode InteractiveServer
 
 <PageTitle>Sportiva - Usuarios</PageTitle>
 
-<FluentStack HorizontalAlignment="HorizontalAlignment.Center">
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+             Style="margin: 12px 0">
 	<h2>Usuarios</h2>
 </FluentStack>
+
+<FluentDataGrid Items="usuarios.AsQueryable()" Pagination="paginacion">
+    <PropertyColumn Property="u => u.Id" Sortable="true" />
+    <PropertyColumn Property="u => u.Nombre" Sortable="true" />
+    <PropertyColumn Property="u => u.Email" Sortable="true" />
+    <PropertyColumn Property="u => roles[u.Rol]" Title="Rol" Sortable="true" />
+</FluentDataGrid>
+
+<FluentPaginator State="paginacion" />
+
+@code {
+    private List<UsuarioModel> usuarios = [];
+    private Dictionary<int, string> roles = [];
+    private PaginationState paginacion = new() { ItemsPerPage = 10 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await usuariosService.ObtenerAsync();
+        roles = await rolesService.ObtenerDiccionarioAsync();
+    }
+}

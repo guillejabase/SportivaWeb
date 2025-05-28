@@ -10,7 +10,7 @@ namespace SportivaWeb.Services
         Task<bool> EmailExisteAsync(string email);
         Task<bool> NombreExisteAsync(string nombre);
         Task<List<UsuarioModel>> ObtenerAsync();
-        Task<UsuarioValidation> ValidarCredencialesAsync(string nombre, string contra);
+        Task<UsuarioValidation> ValidarCredencialesAsync(string nombreOEmail, string contra);
     }
 
     public class UsuariosService(IConfiguration configuration) : IUsuariosService
@@ -35,7 +35,8 @@ namespace SportivaWeb.Services
                     Id = lector.GetInt32(lector.GetOrdinal("Id")),
                     Nombre = lector.GetString(lector.GetOrdinal("Nombre")),
                     Email = lector.GetString(lector.GetOrdinal("Email")),
-                    Contra = lector.GetString(lector.GetOrdinal("Contra"))
+                    Contra = lector.GetString(lector.GetOrdinal("Contra")),
+                    Rol = lector.GetInt32(lector.GetOrdinal("Rol"))
                 });
             }
 
@@ -87,15 +88,15 @@ namespace SportivaWeb.Services
             await comando.ExecuteNonQueryAsync();
         }
 
-        public async Task<UsuarioValidation> ValidarCredencialesAsync(string nombre, string contra)
+        public async Task<UsuarioValidation> ValidarCredencialesAsync(string nombreOEmail, string contra)
         {
             using var conexion = new SqlConnection(Conexion);
 
             await conexion.OpenAsync();
 
-            using var comando = new SqlCommand("SELECT Id, Nombre, Email, Contra FROM Usuarios WHERE Nombre = @Nombre", conexion);
+            using var comando = new SqlCommand("SELECT Id, Nombre, Email, Contra, Rol FROM Usuarios WHERE Nombre = @NombreOEmail OR Email = @NombreOEmail", conexion);
 
-            comando.Parameters.AddWithValue("@Nombre", nombre);
+            comando.Parameters.AddWithValue("@NombreOEmail", nombreOEmail);
 
             using var lector = await comando.ExecuteReaderAsync();
 
@@ -127,7 +128,8 @@ namespace SportivaWeb.Services
                     Id = lector.GetInt32(lector.GetOrdinal("Id")),
                     Nombre = lector.GetString(lector.GetOrdinal("Nombre")),
                     Email = lector.GetString(lector.GetOrdinal("Email")),
-                    Contra = guardada
+                    Contra = guardada,
+                    Rol = lector.GetInt32(lector.GetOrdinal("Rol"))
                 },
                 Existe = true
             };

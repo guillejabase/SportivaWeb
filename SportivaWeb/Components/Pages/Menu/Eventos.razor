@@ -1,7 +1,66 @@
 ﻿@page "/menu/eventos"
+@using SportivaWeb.Models.DB;
+@using SportivaWeb.Services;
+@inject IEventosService eventosService
+@inject IProvinciasService provinciasService
+@inject ISesionService sesionService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Sportiva - Eventos</PageTitle>
 
-<FluentStack HorizontalAlignment="HorizontalAlignment.Center">
-	<h2>Eventos</h2>
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+             Style="margin: 12px 0">
+    <h2>Eventos</h2>
 </FluentStack>
+
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentButton Appearance="Appearance.Accent"
+                  @onclick="@(() => navigationManager.NavigateTo("/menu/eventos/crear-evento"))">
+        Crear evento
+    </FluentButton>
+
+    <FluentStack>
+        <FluentGrid Spacing="2">
+            @foreach (var evento in eventos)
+            {
+                <FluentGridItem>
+                    <FluentCard Width="470px"
+                                Style="cursor: pointer"
+                                @onclick="@(() => navigationManager.NavigateTo($"/menu/eventos/{evento.Id}"))">
+                        <FluentStack Orientation="Orientation.Vertical">
+                            <img src="/images/eventos/@evento.Imagen"
+                                 style="width: 100%; height: 235px; object-fit: cover; object-position: center; border-radius: 4px" />
+
+                            <h4 style="margin-bottom: 6px;">@evento.Nombre</h4>
+
+                            <FluentStack Orientation="Orientation.Vertical"
+                                         HorizontalAlignment="HorizontalAlignment.Left"
+                                         VerticalGap="0">
+                                <span>
+                                    <strong>Fecha de inscripción:</strong> @evento.FechaApeIns.ToString("dd/MM/yyyy") - @evento.FechaCieIns.ToString("dd/MM/yyyy")
+                                </span>
+                                <span>
+                                    <strong>Ubicación:</strong> @provincias[evento.Provincia]
+                                </span>
+                            </FluentStack>
+                        </FluentStack>
+                    </FluentCard>
+                </FluentGridItem>
+            }
+        </FluentGrid>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    private List<EventoModel> eventos = [];
+    private Dictionary<int, string> provincias = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var todosEventos = await eventosService.ObtenerAsync();
+
+        eventos = todosEventos.FindAll(e => e.Usuario == sesionService.Usuario?.Id);
+        provincias = await provinciasService.ObtenerDiccionarioAsync();
+    }
+}
