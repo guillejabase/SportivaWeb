@@ -21,6 +21,8 @@
     </FluentButton>
 
     <FluentStack>
+        @if (eventos.Any())
+        {
         <FluentGrid Spacing="2">
             @foreach (var evento in eventos)
             {
@@ -38,7 +40,7 @@
                                          HorizontalAlignment="HorizontalAlignment.Left"
                                          VerticalGap="0">
                                 <span>
-                                    <strong>Fecha de inscripción:</strong> @evento.FechaApeIns.ToString("dd/MM/yyyy") - @evento.FechaCieIns.ToString("dd/MM/yyyy")
+                                    <strong>Fecha de inscripción:</strong> @evento.FechaApeIns.ToString("dd/MM/yy") - @evento.FechaCieIns.ToString("dd/MM/yy")
                                 </span>
                                 <span>
                                     <strong>Ubicación:</strong> @provincias[evento.Provincia]
@@ -48,7 +50,12 @@
                     </FluentCard>
                 </FluentGridItem>
             }
-        </FluentGrid>
+            </FluentGrid>
+        }
+        else
+        {
+            <span>No hay ningún evento tuyo. ¡Cree uno!</span>
+        }
     </FluentStack>
 </FluentStack>
 

@@ -2,12 +2,15 @@
 @using SportivaWeb.Models.DB;
 @using SportivaWeb.Services;
 @using System.Globalization
+@inject IDialogService dialogService
 @inject IEventosService eventosService
 @inject IProvinciasService provinciasService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Sportiva - Evento</PageTitle>
+
+<FluentDialogProvider />
 
 <FluentStack HorizontalAlignment="HorizontalAlignment.Center"
              Style="margin: 12px 0">
@@ -26,23 +29,23 @@
              style="width: 100%; max-width: 1000px; aspect-ratio: 2/1; object-fit: cover; object-position: center; border-radius: 4px" />
 
         <span>
-            <strong>Fecha de inscripción:</strong> @evento.FechaApeIns.ToString("dd/MM/yyyy") - @evento.FechaCieIns.ToString("dd/MM/yyyy")
+            <strong>Fecha de inscripción:</strong> @evento.FechaApeIns.ToString("dd/MM/yy") - @evento.FechaCieIns.ToString("dd/MM/yy")
+        </span>
+        <span>
+            <strong>Fecha de inicio:</strong> @evento.FechaInicio.ToString("dd/MM/yy")
         </span>
         <span>
             <strong>Ubicación:</strong> @provincia
         </span>
         <span>
-            <strong>Fecha de inicio:</strong> @evento.FechaInicio.ToString("dd/MM/yyyy")
+            <strong>Precio:</strong> $@evento.Precio.ToString("N2", new CultureInfo("es-AR"))
         </span>
         <span>
             <strong>Descripción:</strong> @(!string.IsNullOrWhiteSpace(evento.Descri) ? evento.Descri : "Ninguna")
         </span>
-        <span>
-            <strong>Precio:</strong> $@evento.Precio.ToString("N2", new CultureInfo("es-AR"))
-        </span>
 
         <FluentButton Appearance="Appearance.Accent"
-                      @onclick="@(() => navigationManager.NavigateTo($"/eventos/{Id}/inscripcion"))">
+                      @onclick="InscribirseAsync">
             Inscribirse
         </FluentButton>
     </FluentStack>
@@ -62,5 +65,25 @@
 
         var provincias = await provinciasService.ObtenerDiccionarioAsync();
         provincia = provincias[evento.Provincia];
+    }
+
+    private async Task InscribirseAsync()
+    {
+        if (DateTime.Today > evento.FechaCieIns.Date)
+        {
+            RenderFragment fragmento = @<span>Las inscripciones a este evento están cerradas.</span>;
+            DialogParameters parametros = new()
+            {
+                Title = "Inscripción cerrada",
+                PrimaryAction = "Aceptar",
+                ShowDismiss = false
+            };
+
+            await dialogService.ShowDialogAsync(fragmento, parametros);
+        }
+        else
+        {
+            navigationManager.NavigateTo($"/eventos/{Id}/inscripcion");
+        }
     }
 }

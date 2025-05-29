@@ -169,13 +169,12 @@
     {
         RenderFragment fragmento = @<span>¿Está seguro de que quiere eliminar el evento?</span>;
         DialogParameters parametros = new()
-                {
-                    Title = "Eliminación",
-                    PrimaryAction = "Eliminar",
-                    SecondaryAction = "Cancelar",
-                    ShowDismiss = false,
-                    PreventScroll = true
-                };
+        {
+            Title = "Eliminación",
+            PrimaryAction = "Eliminar",
+            SecondaryAction = "Cancelar",
+            ShowDismiss = false
+        };
         var dialogo = await dialogService.ShowDialogAsync(fragmento, parametros);
         var resultado = await dialogo.Result;
 
@@ -191,11 +190,11 @@
             {
                 RenderFragment fragmento2 = @<span>Ocurrió un error al eliminar el evento.</span>;
                 DialogParameters parametros2 = new()
-                        {
-                            Title = "Error",
-                            PrimaryAction = "Aceptar",
-                            ShowDismiss = false
-                        };
+                {
+                    Title = "Error",
+                    PrimaryAction = "Aceptar",
+                    ShowDismiss = false
+                };
 
                 await dialogService.ShowDialogAsync(fragmento2, parametros2);
             }
@@ -205,18 +204,69 @@
     private async Task ModificarAsync()
     {
         RenderFragment fragmento = @<FluentStack Orientation="Orientation.Vertical">
-                <span>¿Está seguro de que quiere modificar el evento?</span>
-                <FluentSpacer />
-                <span><strong>Nombre:</strong> @evento.Nombre</span>
-            </FluentStack>;
+            <span>¿Está seguro de que quiere modificar el evento?</span>
+
+            <FluentSpacer />
+
+            <FluentStack Width="auto">
+                <FluentStack Orientation="Orientation.Vertical"
+                             HorizontalAlignment="HorizontalAlignment.Center"
+                             Width="400px"
+                             Style="align-items: end">
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Nombre:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Fecha de apertura de inscripción:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Fecha de cierre de inscripción:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Fecha de inicio:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Provincia:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Código postal:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Dirección:
+                    </FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold"
+                                 Alignment="HorizontalAlignment.End">
+                        Precio:
+                    </FluentLabel>
+                </FluentStack>
+
+                <FluentStack Orientation="Orientation.Vertical">
+                    <FluentLabel>@evento.Nombre</FluentLabel>
+                    <FluentLabel>@evento.FechaApeIns.ToString("dd/MM/yy")</FluentLabel>
+                    <FluentLabel>@evento.FechaCieIns.ToString("dd/MM/yy")</FluentLabel>
+                    <FluentLabel>@evento.FechaInicio.ToString("dd/MM/yy")</FluentLabel>
+                    <FluentLabel>@provincias[evento.Provincia].Nombre</FluentLabel>
+                    <FluentLabel>@evento.CodPostal</FluentLabel>
+                    <FluentLabel>@evento.Direccion</FluentLabel>
+                    <FluentLabel>$@evento.Precio.ToString("N2")</FluentLabel>
+                </FluentStack>
+            </FluentStack>
+        </FluentStack>;
         DialogParameters parametros = new()
-                {
-                    Title = "Modificación",
-                    PrimaryAction = "Modificar",
-                    SecondaryAction = "Cancelar",
-                    ShowDismiss = false,
-                    PreventScroll = true
-                };
+        {
+            Title = "Modificación",
+            PrimaryAction = "Modificar",
+            SecondaryAction = "Cancelar",
+            ShowDismiss = false,
+            PreventScroll = true
+        };
         var dialogo = await dialogService.ShowDialogAsync(fragmento, parametros);
         var resultado = await dialogo.Result;
 
@@ -232,11 +282,11 @@
             {
                 RenderFragment fragmento2 = @<span>Ocurrió un error al modificar el evento.</span>;
                 DialogParameters parametros2 = new()
-                    {
-                        Title = "Error",
-                        PrimaryAction = "Aceptar",
-                        ShowDismiss = false
-                    };
+                {
+                    Title = "Error",
+                    PrimaryAction = "Aceptar",
+                    ShowDismiss = false
+                };
 
                 await dialogService.ShowDialogAsync(fragmento2, parametros2);
             }
