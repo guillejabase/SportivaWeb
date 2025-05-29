@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SportivaWeb.Models.DB
+namespace SportivaWeb.Models
 {
     public class UsuarioModel
     {

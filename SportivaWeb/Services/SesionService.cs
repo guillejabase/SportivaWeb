@@ -1,4 +1,5 @@
-﻿using SportivaWeb.Models.DB;
+﻿using Microsoft.FluentUI.AspNetCore.Components;
+using SportivaWeb.Models;
 
 namespace SportivaWeb.Services
 {

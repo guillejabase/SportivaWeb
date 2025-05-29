@@ -1,5 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
-using SportivaWeb.Models.DB;
+using SportivaWeb.Models;
 
 namespace SportivaWeb.Services
 {

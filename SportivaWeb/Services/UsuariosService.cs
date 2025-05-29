@@ -1,5 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
-using SportivaWeb.Models.DB;
+using SportivaWeb.Models;
 using SportivaWeb.Validations;
 
 namespace SportivaWeb.Services
@@ -10,6 +10,7 @@ namespace SportivaWeb.Services
         Task<bool> EmailExisteAsync(string email);
         Task<bool> NombreExisteAsync(string nombre);
         Task<UsuarioModel?> ObtenerAsync(int id);
+        Task<Dictionary<int, string>> ObtenerDiccionarioAsync();
         Task<List<UsuarioModel>> ObtenerListaAsync();
         Task<UsuarioValidation> ValidarCredencialesAsync(string nombreOEmail, string contra);
     }
@@ -41,6 +42,12 @@ namespace SportivaWeb.Services
             }
 
             return lista;
+        }
+
+        public async Task<Dictionary<int, string>> ObtenerDiccionarioAsync()
+        {
+            var lista = await ObtenerListaAsync();
+            return lista.ToDictionary(o => o.Id, o => o.Nombre);
         }
 
         public async Task<UsuarioModel?> ObtenerAsync(int id)

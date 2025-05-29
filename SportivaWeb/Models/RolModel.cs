@@ -1,6 +1,6 @@
-﻿namespace SportivaWeb.Models.DB
+﻿namespace SportivaWeb.Models
 {
-    public class ProvinciaModel
+    public class RolModel
     {
         public int Id { get; set; }
 

@@ -1,4 +1,4 @@
-﻿using SportivaWeb.Models.DB;
+﻿using SportivaWeb.Models;
 
 namespace SportivaWeb.Validations
 {

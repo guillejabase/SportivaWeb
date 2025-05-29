@@ -1,13 +1,13 @@
 ﻿@page "/menu/eventos/{Id:int}"
-@using SportivaWeb.Models.DB;
-@using SportivaWeb.Services;
 @inject IDialogService dialogService
 @inject IEventosService eventosService
 @inject IProvinciasService provinciasService
 @inject NavigationManager navigationManager
+@using SportivaWeb.Models
+@using SportivaWeb.Services
 @rendermode InteractiveServer
 
-<PageTitle>Sportiva - Evento</PageTitle>
+<PageTitle>Sportiva - Configuración de evento</PageTitle>
 
 <FluentDialogProvider />
 
@@ -121,6 +121,11 @@
                       @onclick="ModificarAsync">
             Modificar
         </FluentButton>
+
+        <FluentButton Appearance="Appearance.Accent"
+                      @onclick="@(() => navigationManager.NavigateTo($"/menu/eventos/{Id}/inscripciones"))">
+            Inscripciones
+        </FluentButton>
     </FluentStack>
 
     <FluentSpacer />
@@ -157,7 +162,7 @@
         get => evento.Provincia.ToString();
         set { if (int.TryParse(value, out var id)) evento.Provincia = id; }
     }
-    private string? mensaje;
+    private string? mensaje = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

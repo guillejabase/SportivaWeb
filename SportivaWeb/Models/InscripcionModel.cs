@@ -1,4 +1,4 @@
-﻿namespace SportivaWeb.Models.DB
+﻿namespace SportivaWeb.Models
 {
     public class InscripcionModel
     {

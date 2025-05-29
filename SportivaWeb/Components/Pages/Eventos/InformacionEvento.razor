@@ -1,14 +1,14 @@
 ﻿@page "/eventos/{Id:int}"
-@using SportivaWeb.Models.DB;
-@using SportivaWeb.Services;
 @using System.Globalization
+@using SportivaWeb.Models
+@using SportivaWeb.Services
 @inject IDialogService dialogService
 @inject IEventosService eventosService
 @inject IProvinciasService provinciasService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-<PageTitle>Sportiva - Evento</PageTitle>
+<PageTitle>Sportiva - Información de evento</PageTitle>
 
 <FluentDialogProvider />
 

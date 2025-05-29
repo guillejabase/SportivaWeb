@@ -4,47 +4,74 @@
 @rendermode InteractiveServer
 
 <div class="navmenu">
-	<input type="checkbox"
-		   id="navmenu-toggle"
-		   class="navmenu-icon" />
+    <input type="checkbox"
+           id="navmenu-toggle"
+           class="navmenu-icon" />
 
-	<label for="navmenu-toggle"
-		   class="navmenu-icon">
-		<FluentIcon Value="@(new Icons.Regular.Size20.Navigation())"
-					Color="Color.Fill" />
-	</label>
+    <label for="navmenu-toggle"
+           class="navmenu-icon">
+        <FluentIcon Value="@(new Icons.Regular.Size20.Navigation())"
+                    Color="Color.Fill" />
+    </label>
 
-	<nav class="sitenav"
-		 aria-labelledby="main-menu">
-		<FluentNavMenu Id="main-menu"
-					   Collapsible="true"
-					   Width="250"
-					   Title="Navigation menu"
-					   CustomToggle="true"
-					   @bind-Expanded="expanded">
-			@foreach (var item in navItems)
-			{
-				if (item.Roles.Any(r => r == sesionService.Usuario?.Rol))
-				{
-					<FluentNavLink Href="@item.Ruta"
-								   Match="NavLinkMatch.All"
-								   Icon="@item.Icono"
-								   IconColor="Color.Accent"
-								   Tooltip="@item.Titulo">
-						@item.Titulo
-					</FluentNavLink>
-				}
-			}
-		</FluentNavMenu>
-	</nav>
+    <nav class="sitenav"
+         aria-labelledby="main-menu">
+        <FluentNavMenu Id="main-menu"
+                       Collapsible="true"
+                       Width="250"
+                       Title="Navigation menu"
+                       CustomToggle="true"
+                       @bind-Expanded="expanded">
+            @if (sesionService.Usuario?.Rol == 2 || sesionService.Usuario?.Rol == 1)
+            {
+                <FluentNavLink Href="/menu/eventos"
+                               Match="NavLinkMatch.All"
+                               Icon="new Icons.Regular.Size24.BoxMultiple()"
+                               IconColor="Color.Accent"
+                               Tooltip="Eventos">
+                    Eventos
+                </FluentNavLink>
+            }
+            @if (sesionService.Usuario?.Rol == 1)
+            {
+                <FluentNavLink Href="/menu/usuarios"
+                               Match="NavLinkMatch.All"
+                               Icon="new Icons.Regular.Size24.People()"
+                               IconColor="Color.Accent"
+                               Tooltip="Usuarios">
+                    Usuarios
+                </FluentNavLink>
+                <FluentNavGroup Title="Reportes"
+                                Icon="new Icons.Regular.Size24.DocumentFolder()"
+                                IconColor="Color.Accent"
+                                Tooltip="Reportes">
+                    <FluentNavLink Href="/menu/reportes/eventos"
+                                   Match="NavLinkMatch.All"
+                                   Icon="new Icons.Regular.Size24.BoxMultiple()"
+                                   IconColor="Color.Accent"
+                                   Tooltip="Eventos">
+                        Eventos
+                    </FluentNavLink>
+                    <FluentNavLink Href="/menu/reportes/inscripciones"
+                                   Match="NavLinkMatch.All"
+                                   Icon="new Icons.Regular.Size24.ClipboardTextLtr()"
+                                   IconColor="Color.Accent"
+                                   Tooltip="Inscripciones">
+                        Inscripciones
+                    </FluentNavLink>
+                    <FluentNavLink Href="/menu/reportes/usuarios"
+                                   Match="NavLinkMatch.All"
+                                   Icon="new Icons.Regular.Size24.People()"
+                                   IconColor="Color.Accent"
+                                   Tooltip="Usuarios">
+                        Usuarios
+                    </FluentNavLink>
+                </FluentNavGroup>
+            }
+        </FluentNavMenu>
+    </nav>
 </div>
 
 @code {
-	private bool expanded = true;
-
-	private List<NavItem> navItems = new()
-	{
-		new() { Ruta = "/menu/eventos", Icono = new Icons.Regular.Size24.BoxMultiple(), Titulo = "Eventos", Roles = [1, 2] },
-		new() { Ruta = "/menu/usuarios", Icono = new Icons.Regular.Size24.People(), Titulo = "Usuarios", Roles = [1] }
-	};
+    private bool expanded = true;
 }

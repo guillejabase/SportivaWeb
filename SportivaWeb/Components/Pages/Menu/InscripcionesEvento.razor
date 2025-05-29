@@ -1,0 +1,72 @@
+﻿@page "/menu/eventos/{Id:int}/inscripciones"
+@inject IEventosService eventosService
+@inject IInscripcionesService inscripcionesService
+@inject IInscriptosService inscriptosService
+@inject IProvinciasService provinciasService
+@inject ISexosService sexosService
+@inject NavigationManager navigationManager
+@using SportivaWeb.Models
+@using SportivaWeb.Services
+@rendermode InteractiveServer
+
+<PageTitle>Sportiva - Inscripciones de evento</PageTitle>
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+             Style="margin: 12px 0">
+    <h2>Inscripciones de evento:</h2> <h2 style="font-weight: normal">@evento.Nombre</h2>
+</FluentStack>
+
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentButton Appearance="Appearance.Accent"
+                  @onclick="@(() => navigationManager.NavigateTo($"/menu/eventos/{Id}"))">
+        Volver
+    </FluentButton>
+
+    <FluentSpacer />
+</FluentStack>
+
+<FluentDataGrid Items="inscriptos.AsQueryable()" Pagination="paginacion">
+    <PropertyColumn Property="o => o.Id" Sortable="true" />
+    <PropertyColumn Property="o => o.Email" Sortable="true" />
+    <PropertyColumn Property="o => o.Nombres" Sortable="true" />
+    <PropertyColumn Property="o => o.Apellidos" Sortable="true" />
+    <PropertyColumn Property="o => provincias[o.Provincia]" Title="Provincia" Sortable="true" />
+    <PropertyColumn Property="o => o.CodPostal" Title="Cód. postal" Sortable="true" />
+    <PropertyColumn Property="o => o.DNI" Sortable="true" />
+    <PropertyColumn Property="@(o => o.FechaNaci.ToString("dd/MM/yy") + $" ({CalcularEdad(o.FechaNaci)} años)")" Title="Fecha de nacimiento" Sortable="true" />
+    <PropertyColumn Property="o => sexos[o.Sexo]" Title="Sexo" Sortable="true" />
+    <PropertyColumn Property="o => o.Telefono" Title="Teléfono" Sortable="true" />
+</FluentDataGrid>
+
+<FluentPaginator State="paginacion" />
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EventoModel evento = new();
+    private List<InscripcionModel> inscripciones = [];
+    private List<InscriptoModel> inscriptos = [];
+    private Dictionary<int, string> provincias = [];
+    private Dictionary<int, string> sexos = [];
+    private PaginationState paginacion = new() { ItemsPerPage = 10 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        evento = (await eventosService.ObtenerAsync(Id))!;
+        inscripciones = (await inscripcionesService.ObtenerListaAsync()).FindAll(o => o.Evento == evento.Id);
+        inscriptos = (await inscriptosService.ObtenerListaAsync()).FindAll(o => inscripciones.Any(p => p.Inscripto == o.Id));
+        provincias = await provinciasService.ObtenerDiccionarioAsync();
+        sexos = await sexosService.ObtenerDiccionarioAsync();
+    }
+
+    private int CalcularEdad(DateTime fechaNaci)
+    {
+        var hoy = DateTime.Today;
+        var edad = hoy.Year - fechaNaci.Year;
+
+        if (fechaNaci.Date > hoy.AddYears(-edad)) edad--;
+
+        return edad;
+    }
+}

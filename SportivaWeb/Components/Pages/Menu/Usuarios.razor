@@ -1,7 +1,7 @@
 ﻿@page "/menu/usuarios"
 @inject IRolesService rolesService
 @inject IUsuariosService usuariosService
-@using SportivaWeb.Models.DB
+@using SportivaWeb.Models
 @using SportivaWeb.Services
 @rendermode InteractiveServer
 
@@ -13,10 +13,10 @@
 </FluentStack>
 
 <FluentDataGrid Items="usuarios.AsQueryable()" Pagination="paginacion">
-    <PropertyColumn Property="u => u.Id" Sortable="true" />
-    <PropertyColumn Property="u => u.Nombre" Sortable="true" />
-    <PropertyColumn Property="u => u.Email" Sortable="true" />
-    <PropertyColumn Property="u => roles[u.Rol]" Title="Rol" Sortable="true" />
+    <PropertyColumn Property="o => o.Id" Sortable="true" />
+    <PropertyColumn Property="o => o.Nombre" Sortable="true" />
+    <PropertyColumn Property="o => o.Email" Sortable="true" />
+    <PropertyColumn Property="o => roles[o.Rol]" Title="Rol" Sortable="true" />
 </FluentDataGrid>
 
 <FluentPaginator State="paginacion" />

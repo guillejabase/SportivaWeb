@@ -1,0 +1,128 @@
+﻿@page "/menu/reportes/eventos"
+@inject IEventosService eventosService
+@inject IProvinciasService provinciasService
+@inject IUsuariosService usuariosService
+@using SportivaWeb.Models
+@using SportivaWeb.Services
+@rendermode InteractiveServer
+
+<PageTitle>Sportiva - Reportes de eventos</PageTitle>
+
+<FluentStack HorizontalAlignment="HorizontalAlignment.Center"
+             Style="margin: 12px 0">
+    <h2>Reportes de eventos</h2>
+</FluentStack>
+
+<FluentStack VerticalAlignment="VerticalAlignment.Center"
+             Style="margin-bottom: 12px">
+    <FluentCheckbox @bind-Value="id">Id</FluentCheckbox>
+    <FluentCheckbox @bind-Value="nombre">Nombre</FluentCheckbox>
+    <FluentCheckbox @bind-Value="fechaApeIns">Fecha apertura inscripción</FluentCheckbox>
+    <FluentCheckbox @bind-Value="fechaCieIns">Fecha cierre inscripción</FluentCheckbox>
+    <FluentCheckbox @bind-Value="fechaInicio">Fecha inicio</FluentCheckbox>
+    <FluentCheckbox @bind-Value="provincia">Provincia</FluentCheckbox>
+    <FluentCheckbox @bind-Value="codPostal">Código postal</FluentCheckbox>
+    <FluentCheckbox @bind-Value="direccion">Dirección</FluentCheckbox>
+    <FluentCheckbox @bind-Value="precio">Precio</FluentCheckbox>
+    <FluentCheckbox @bind-Value="usuario">Usuario</FluentCheckbox>
+</FluentStack>
+
+<FluentDataGrid Items="eventos.AsQueryable()" Pagination="paginacion">
+    @if (id)
+    {
+        <PropertyColumn Property="o => o.Id"
+                        Sortable="true" />
+    }
+    @if (nombre)
+    {
+        <PropertyColumn Property="o => o.Nombre"
+                        Sortable="true"
+                        Filtered="!string.IsNullOrWhiteSpace(filtroNombre)">
+            <ColumnOptions>
+                <div class="search-box">
+                    <FluentSearch Autofocus="true"
+                                  Style="width: 100%"
+                                  @bind-Value="filtroNombre"
+                                  @oninput="ManejarFiltroNombre"
+                                  @bind-Value:after="LimpiarFiltroNombre" />
+                </div>
+            </ColumnOptions>
+        </PropertyColumn>
+    }
+    @if (fechaApeIns)
+    {
+        <PropertyColumn Property="@(o => o.FechaApeIns.ToString("dd/MM/yy"))" Title="Apertura inscripción" Sortable="true" />
+    }
+    @if (fechaCieIns)
+    {
+        <PropertyColumn Property="@(o => o.FechaCieIns.ToString("dd/MM/yy"))" Title="Cierre inscripción" Sortable="true" />
+    }
+    @if (fechaInicio)
+    {
+        <PropertyColumn Property="@(o => o.FechaInicio.ToString("dd/MM/yy"))" Title="Inicio" Sortable="true" />
+    }
+    @if (provincia)
+    {
+        <PropertyColumn Property="o => provincias[o.Provincia]" Title="Provincia" Sortable="true" />
+    }
+    @if (codPostal)
+    {
+        <PropertyColumn Property="o => o.CodPostal" Title="Cód. postal" Sortable="true" />
+    }
+    @if (direccion)
+    {
+        <PropertyColumn Property="o => o.Direccion" Title="Dirección" Sortable="true" />
+    }
+    @if (precio)
+    {
+        <PropertyColumn Property="@(o => "$" + o.Precio.ToString("N2"))" Title="Precio" Sortable="true" />
+    }
+    @if (usuario)
+    {
+        <PropertyColumn Property="o => usuarios[o.Usuario]" Title="Usuario" Sortable="true" />
+    }
+</FluentDataGrid>
+
+<FluentPaginator State="paginacion" />
+
+@code {
+    private List<EventoModel> eventos = [];
+    private Dictionary<int, string> provincias = [];
+    private Dictionary<int, string> usuarios = [];
+    private PaginationState paginacion = new() { ItemsPerPage = 10 };
+
+    bool id = true;
+    bool nombre = true;
+    string filtroNombre = string.Empty;
+    bool fechaApeIns = true;
+    bool fechaCieIns = true;
+    bool fechaInicio = true;
+    bool provincia = true;
+    bool codPostal = true;
+    bool direccion = true;
+    bool precio = true;
+    bool usuario = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        eventos = await eventosService.ObtenerListaAsync();
+        provincias = await provinciasService.ObtenerDiccionarioAsync();
+        usuarios = await usuariosService.ObtenerDiccionarioAsync();
+    }
+
+    private void ManejarFiltroNombre(ChangeEventArgs args)
+    {
+        if (args.Value is string value)
+        {
+            filtroNombre = value;
+        }
+    }
+
+    private void LimpiarFiltroNombre()
+    {
+        if (string.IsNullOrWhiteSpace(filtroNombre))
+        {
+            filtroNombre = string.Empty;
+        }
+    }
+}
