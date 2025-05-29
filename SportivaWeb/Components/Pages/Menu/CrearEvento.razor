@@ -1,4 +1,13 @@
 ﻿@page "/menu/eventos/crear-evento"
+@inject IEventosService eventosService
+@inject IProvinciasService provinciasService
+@inject ISesionService sesionService
+@inject NavigationManager navigationManager
+@using Microsoft.Data.SqlClient
+@using SportivaWeb.Models.DB
+@using SportivaWeb.Services
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveServer
 
 <PageTitle>Sportiva - Crear evento</PageTitle>
 
@@ -6,3 +15,184 @@
              Style="margin: 12px 0">
     <h2>Crear evento</h2>
 </FluentStack>
+
+
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentButton Appearance="Appearance.Accent"
+                  @onclick="@(() => navigationManager.NavigateTo($"/menu/eventos"))">
+        Volver
+    </FluentButton>
+
+    <FluentSpacer />
+
+    <FluentStack Orientation="Orientation.Vertical">
+        <FluentStack Width="auto">
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Center"
+                         Style="align-items: end">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Nombre:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Fecha de apertura de inscripción:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Fecha de cierre de inscripción:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Fecha de inicio:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Provincia:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Código postal:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Dirección:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Precio:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Descripción:
+                </FluentLabel>
+            </FluentStack>
+
+            <FluentStack Orientation="Orientation.Vertical"
+                         Width="600px">
+                <FluentTextField Style="width: inherit"
+                                 @bind-Value="evento.Nombre" />
+                <FluentDatePicker Style="width: inherit"
+                                  Value="fechaApeIns"
+                                  ValueChanged="EventCallback.Factory.Create<DateTime?>(this, v => fechaApeIns = v)" />
+                <FluentDatePicker Style="width: inherit"
+                                  Value="fechaCieIns"
+                                  ValueChanged="EventCallback.Factory.Create<DateTime?>(this, v => fechaCieIns = v)" />
+                <FluentDatePicker Style="width: inherit"
+                                  Value="fechaInicio"
+                                  ValueChanged="EventCallback.Factory.Create<DateTime?>(this, v => fechaInicio = v)" />
+                <FluentSelect Items="provincias"
+                              Height="200px"
+                              Width="inherit"
+                              Placeholder=" "
+                              OptionValue="o => o.Id.ToString()"
+                              OptionText="o => o.Nombre"
+                              @bind-Value="provincia" />
+                <FluentTextField TextFieldType="TextFieldType.Number"
+                                 Style="width: inherit"
+                                 @bind-Value="evento.CodPostal" />
+                <FluentTextField Style="width: inherit"
+                                 @bind-Value="evento.Direccion" />
+                <FluentNumberField Style="width: inherit"
+                                 @bind-Value="evento.Precio" />
+                <FluentTextArea Rows="10"
+                                Style="width: inherit"
+                                @bind-Value="evento.Descri" />
+
+                <FluentSpacer />
+
+                <FluentButton Appearance="Appearance.Accent"
+                              @onclick="AgregarAsync">
+                    Crear
+                </FluentButton>
+
+                @if (!string.IsNullOrWhiteSpace(mensaje))
+                {
+                    <span style="color: red; margin-bottom: 24px">@((MarkupString)mensaje)</span>
+                }
+            </FluentStack>
+        </FluentStack>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    private EventoModel evento = new();
+    private DateTime? fechaApeIns
+    {
+        get => evento.FechaApeIns;
+        set { if (value.HasValue) evento.FechaApeIns = value.Value; }
+    }
+    private DateTime? fechaCieIns
+    {
+        get => evento.FechaCieIns;
+        set { if (value.HasValue) evento.FechaCieIns = value.Value; }
+    }
+    private DateTime? fechaInicio
+    {
+        get => evento.FechaInicio;
+        set { if (value.HasValue) evento.FechaInicio = value.Value; }
+    }
+    private List<ProvinciaModel> provincias = [];
+    private string? provincia;
+    private string? mensaje;
+
+    protected override async Task OnInitializedAsync()
+    {
+        provincias = await provinciasService.ObtenerListaAsync();
+    }
+
+    private async Task AgregarAsync()
+    {
+        mensaje = string.Empty;
+        List<string> mensajes = [];
+
+        var contexto = new ValidationContext(evento);
+        var resultados = new List<ValidationResult>();
+
+        Validator.TryValidateObject(evento, contexto, resultados, true);
+
+        mensajes.AddRange(resultados.Select(r => r.ErrorMessage!));
+
+        if (evento.FechaCieIns < evento.FechaApeIns)
+        {
+            mensajes.Add("La fecha de cierre de inscripción no puede ser menor que la de apertura.");
+        }
+        if (evento.FechaInicio < evento.FechaCieIns)
+        {
+            mensajes.Add("La fecha de inicio del evento no puede ser anterior al cierre de inscripción.");
+        }
+        if (mensajes.Any())
+        {
+            mensaje = string.Join("<br />", mensajes);
+            return;
+        }
+
+        evento.Provincia = Convert.ToInt32(provincia);
+        evento.Usuario = sesionService.Usuario!.Id;
+
+        try
+        {
+            await eventosService.AgregarAsync(evento);
+        }
+        catch (SqlException ex) when (ex.Number == 2627)
+        {
+            mensaje = "Ya existe un evento con esos datos.";
+            return;
+        }
+
+        mensaje = "Evento creado exitosamente. Redirigiendo...";
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        navigationManager.NavigateTo("/menu/eventos");
+    }
+}

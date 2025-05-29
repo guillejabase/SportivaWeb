@@ -9,6 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
+builder.Services.AddScoped<IDialogService, DialogService>();
 builder.Services.AddScoped<IEventosService, EventosService>();
 builder.Services.AddScoped<IInscripcionesService, InscripcionesService>();
 builder.Services.AddScoped<IInscriptosService, InscriptosService>();

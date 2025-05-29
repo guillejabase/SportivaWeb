@@ -22,9 +22,11 @@ namespace SportivaWeb.Models.DB
         public int Provincia { get; set; } // FK ProvinciaModel
 
         [Required(ErrorMessage = "Ingrese código postal.")]
+        [StringLength(4, ErrorMessage = "Código postal inválido.")]
         public string CodPostal { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ingrese DNI.")]
+        [StringLength(8, ErrorMessage = "El DNI debe tener como máximo 8 dígitos.")]
         public string DNI { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ingrese fecha de nacimiento.")]

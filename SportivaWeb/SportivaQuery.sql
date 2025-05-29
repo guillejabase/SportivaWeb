@@ -54,24 +54,26 @@ VALUES ('Hombre'), ('Mujer');
 
 CREATE TABLE Eventos (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
-	Nombre VARCHAR(64) NOT NULL,
+	Nombre VARCHAR(16) NOT NULL UNIQUE,
 	Descri VARCHAR(2048),
 	FechaApeIns DATE NOT NULL,
 	FechaCieIns DATE NOT NULL,
 	FechaInicio DATETIME2(0) NOT NULL,
 	Provincia INT NOT NULL,
-	Imagen VARCHAR(128),
+	CodPostal VARCHAR(4) NOT NULL,
+	Direccion VARCHAR(64) NOT NULL,
 	Precio DECIMAL(16, 2) NOT NULL,
+	Imagen VARCHAR(128),
 	Usuario INT NOT NULL,
 
 	CONSTRAINT FK_Eventos_Provincia FOREIGN KEY (Provincia) REFERENCES Provincias(Id),
 	CONSTRAINT FK_Eventos_Usuario FOREIGN KEY (Usuario) REFERENCES Usuarios(Id)
 );
 
-INSERT INTO Eventos (Nombre, Descri, FechaApeIns, FechaCieIns, FechaInicio, Provincia, Imagen, Precio, Usuario)
-VALUES ('ecoTrail', '', '2025-08-05', '2025-08-07', '2025-09-07T09:30:00', 1, '1.jpg', 30000, 1),
-       ('Soberana', '', '2025-10-11', '2025-10-13', '2025-11-13T14:30:00', 12, '2.jpg', 32000, 3),
-	   ('Brutal Race', '', '2025-08-09', '2025-08-11', '2025-09-13T09:00:00', 6, '3.jpg', 25000, 3);
+INSERT INTO Eventos (Nombre, Descri, FechaApeIns, FechaCieIns, FechaInicio, Provincia, CodPostal, Direccion, Precio, Imagen, Usuario)
+VALUES ('ecoTrail', '', '2025-08-05', '2025-08-07', '2025-09-07T09:30:00', 1, '1428', 'Av. Pres. Figueroa Alcorta 7597', 30000, '1.jpg', 1),
+       ('Soberana', '', '2025-10-11', '2025-10-13', '2025-11-13T14:30:00', 12, '5300', 'Av. Ortiz de Ocampo 1700', 32000, '2.jpg', 3),
+	   ('Brutal Race', '', '2025-08-09', '2025-08-11', '2025-09-13T09:00:00', 6, '5000', 'Bv. Perón 450', 25000, '3.jpg', 3);
 
 CREATE TABLE Inscriptos (
 	Id INT IDENTITY(1,1) PRIMARY KEY,
@@ -80,7 +82,7 @@ CREATE TABLE Inscriptos (
 	Apellidos VARCHAR(32) NOT NULL,
 	FechaNaci DATETIME2(0) NOT NULL,
 	Sexo INT NOT NULL,
-	DNI INT NOT NULL UNIQUE,
+	DNI VARCHAR(8) NOT NULL UNIQUE,
 	Provincia INT NOT NULL,
 	CodPostal VARCHAR(4) NOT NULL,
 	Telefono VARCHAR(32) NOT NULL,

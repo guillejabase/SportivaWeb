@@ -1,11 +1,15 @@
 ﻿@page "/menu/eventos/{Id:int}"
 @using SportivaWeb.Models.DB;
 @using SportivaWeb.Services;
+@inject IDialogService dialogService
 @inject IEventosService eventosService
+@inject IProvinciasService provinciasService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Sportiva - Evento</PageTitle>
+
+<FluentDialogProvider />
 
 <FluentStack HorizontalAlignment="HorizontalAlignment.Center"
              Style="margin: 12px 0">
@@ -18,6 +22,113 @@
         Volver
     </FluentButton>
 
+    <FluentSpacer />
+
+    <FluentStack Orientation="Orientation.Vertical">
+        <FluentStack Width="auto">
+            <FluentStack Orientation="Orientation.Vertical"
+                         HorizontalAlignment="HorizontalAlignment.Center"
+                         Style="align-items: end">
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Nombre:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Fecha de apertura de inscripción:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Fecha de cierre de inscripción:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Fecha de inicio:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Provincia:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Código postal:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Dirección:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Precio:
+                </FluentLabel>
+                <FluentLabel Weight="FontWeight.Bold"
+                             MarginBlock="6px"
+                             Alignment="HorizontalAlignment.End">
+                    Descripción:
+                </FluentLabel>
+            </FluentStack>
+
+            <FluentStack Orientation="Orientation.Vertical"
+                         Width="600px">
+                <FluentTextField Style="width: inherit"
+                                 @bind-Value="evento.Nombre" />
+                <FluentDatePicker Style="width: inherit"
+                                  Value="fechaApeIns"
+                                  ValueChanged="EventCallback.Factory.Create<DateTime?>(this, v => fechaApeIns = v)" />
+                <FluentDatePicker Style="width: inherit"
+                                  Value="fechaCieIns"
+                                  ValueChanged="EventCallback.Factory.Create<DateTime?>(this, v => fechaCieIns = v)" />
+                <FluentDatePicker Style="width: inherit"
+                                  Value="fechaInicio"
+                                  ValueChanged="EventCallback.Factory.Create<DateTime?>(this, v => fechaInicio = v)" />
+                <FluentSelect Items="provincias"
+                              Height="200px"
+                              Width="inherit"
+                              OptionValue="o => o.Id.ToString()"
+                              OptionText="o => o.Nombre"
+                              @bind-Value="provincia" />
+                <FluentTextField TextFieldType="TextFieldType.Number"
+                                 Style="width: inherit"
+                                 @bind-Value="evento.CodPostal" />
+                <FluentTextField Style="width: inherit"
+                                 @bind-Value="evento.Direccion" />
+                <FluentNumberField Style="width: inherit"
+                                   @bind-Value="evento.Precio" />
+                <FluentTextArea Rows="10"
+                                Style="width: inherit"
+                                @bind-Value="evento.Descri" />
+            </FluentStack>
+        </FluentStack>
+    </FluentStack>
+
+    <FluentSpacer />
+
+    <FluentStack Orientation="Orientation.Horizontal">
+        <FluentButton Appearance="Appearance.Accent"
+                      @onclick="EliminarAsync">
+            Eliminar
+        </FluentButton>
+
+        <FluentButton Appearance="Appearance.Accent"
+                      @onclick="ModificarAsync">
+            Modificar
+        </FluentButton>
+    </FluentStack>
+
+    <FluentSpacer />
+
+    @if (!string.IsNullOrWhiteSpace(mensaje))
+    {
+        <span style="color: red; margin-bottom: 24px">@((MarkupString)mensaje)</span>
+    }
 </FluentStack>
 
 @code {
@@ -25,9 +136,110 @@
     public int Id { get; set; }
 
     private EventoModel evento = new();
+    private DateTime? fechaApeIns
+    {
+        get => evento.FechaApeIns;
+        set { if (value.HasValue) evento.FechaApeIns = value.Value; }
+    }
+    private DateTime? fechaCieIns
+    {
+        get => evento.FechaCieIns;
+        set { if (value.HasValue) evento.FechaCieIns = value.Value; }
+    }
+    private DateTime? fechaInicio
+    {
+        get => evento.FechaInicio;
+        set { if (value.HasValue) evento.FechaInicio = value.Value; }
+    }
+    private List<ProvinciaModel> provincias = [];
+    private string? provincia
+    {
+        get => evento.Provincia.ToString();
+        set { if (int.TryParse(value, out var id)) evento.Provincia = id; }
+    }
+    private string? mensaje;
 
     protected override async Task OnInitializedAsync()
     {
         evento = (await eventosService.ObtenerAsync(Id))!;
+        provincias = await provinciasService.ObtenerListaAsync();
+    }
+
+    private async Task EliminarAsync()
+    {
+        RenderFragment fragmento = @<span>¿Está seguro de que quiere eliminar el evento?</span>;
+        DialogParameters parametros = new()
+                {
+                    Title = "Eliminación",
+                    PrimaryAction = "Eliminar",
+                    SecondaryAction = "Cancelar",
+                    ShowDismiss = false,
+                    PreventScroll = true
+                };
+        var dialogo = await dialogService.ShowDialogAsync(fragmento, parametros);
+        var resultado = await dialogo.Result;
+
+        if (!resultado.Cancelled)
+        {
+            var codigo = await eventosService.EliminarAsync(Id);
+
+            if (codigo)
+            {
+                navigationManager.NavigateTo("/menu/eventos");
+            }
+            else
+            {
+                RenderFragment fragmento2 = @<span>Ocurrió un error al eliminar el evento.</span>;
+                DialogParameters parametros2 = new()
+                        {
+                            Title = "Error",
+                            PrimaryAction = "Aceptar",
+                            ShowDismiss = false
+                        };
+
+                await dialogService.ShowDialogAsync(fragmento2, parametros2);
+            }
+        }
+    }
+
+    private async Task ModificarAsync()
+    {
+        RenderFragment fragmento = @<FluentStack Orientation="Orientation.Vertical">
+                <span>¿Está seguro de que quiere modificar el evento?</span>
+                <FluentSpacer />
+                <span><strong>Nombre:</strong> @evento.Nombre</span>
+            </FluentStack>;
+        DialogParameters parametros = new()
+                {
+                    Title = "Modificación",
+                    PrimaryAction = "Modificar",
+                    SecondaryAction = "Cancelar",
+                    ShowDismiss = false,
+                    PreventScroll = true
+                };
+        var dialogo = await dialogService.ShowDialogAsync(fragmento, parametros);
+        var resultado = await dialogo.Result;
+
+        if (!resultado.Cancelled)
+        {
+            var codigo = await eventosService.ModificarAsync(evento);
+
+            if (codigo)
+            {
+                navigationManager.NavigateTo("/menu/eventos");
+            }
+            else
+            {
+                RenderFragment fragmento2 = @<span>Ocurrió un error al modificar el evento.</span>;
+                DialogParameters parametros2 = new()
+                    {
+                        Title = "Error",
+                        PrimaryAction = "Aceptar",
+                        ShowDismiss = false
+                    };
+
+                await dialogService.ShowDialogAsync(fragmento2, parametros2);
+            }
+        }
     }
 }

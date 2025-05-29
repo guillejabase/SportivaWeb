@@ -28,10 +28,10 @@
 
         <FluentSpacer />
 
-        <FluentStack Orientation="Orientation.Vertical"
-                     HorizontalAlignment="HorizontalAlignment.Center">
+        <FluentStack Orientation="Orientation.Vertical">
             <FluentStack Width="auto">
                 <FluentStack Orientation="Orientation.Vertical"
+                             HorizontalAlignment="HorizontalAlignment.Center"
                              Style="align-items: end">
                     <FluentLabel Weight="FontWeight.Bold"
                                  MarginBlock="6px"
@@ -81,7 +81,7 @@
                 </FluentStack>
 
                 <FluentStack Orientation="Orientation.Vertical"
-                             Width="300px">
+                             Width="400px">
                     <FluentTextField TextFieldType="TextFieldType.Email"
                                      Style="width: inherit"
                                      @bind-Value="inscripto.Email" />
@@ -96,6 +96,7 @@
                                   Items="sexos"
                                   Height="200px"
                                   Width="inherit"
+                                  Placeholder=" "
                                   OptionValue="o => o.Id.ToString()"
                                   OptionText="o => o.Nombre"
                                   @bind-Value="sexo" />
@@ -106,6 +107,7 @@
                                   Items="provincias"
                                   Height="200px"
                                   Width="inherit"
+                                  Placeholder=" "
                                   OptionValue="o => o.Id.ToString()"
                                   OptionText="o => o.Nombre"
                                   @bind-Value="provincia" />
